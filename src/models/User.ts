@@ -35,6 +35,13 @@ export const initUser = (sequelize: Sequelize) =>
       },
     },
     {
+      scopes: {
+        public: {
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+      },
       sequelize,
       tableName: "Users",
     }

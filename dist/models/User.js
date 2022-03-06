@@ -57,6 +57,13 @@ var initUser = function initUser(sequelize) {
       allowNull: false
     }
   }, {
+    scopes: {
+      "public": {
+        attributes: {
+          exclude: ["password"]
+        }
+      }
+    },
     sequelize: sequelize,
     tableName: "Users"
   });
