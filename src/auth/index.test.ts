@@ -38,7 +38,7 @@ describe("authenticatePassword", () => {
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
     const incorrectPassword = password + faker.random.alphaNumeric(1);
-    UserFactory.create({
+    await UserFactory.create({
       email,
       password: await bcrypt.hash(password, PASSWORD_SALT_ROUNDS),
     });

@@ -14,8 +14,8 @@ export class UserFactory {
     );
   }
 
-  static create(attributes?: Partial<UserAttributes>) {
-    return User.create(
+  static async create(attributes?: Partial<UserAttributes>) {
+    return await User.create(
       defaults(attributes, {
         email: faker.internet.email(),
         password: faker.random.alphaNumeric(20),
