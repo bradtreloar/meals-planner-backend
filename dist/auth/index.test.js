@@ -55,7 +55,7 @@ describe("authenticatePassword", function () {
 
           case 12:
             _context.next = 14;
-            return _User["default"].findOne({
+            return _User["default"].scope("public").findOne({
               where: {
                 email: email
               }
@@ -68,7 +68,7 @@ describe("authenticatePassword", function () {
 
           case 17:
             result = _context.sent;
-            expect(result).toStrictEqual(user);
+            expect(result.toJSON()).toStrictEqual(user === null || user === void 0 ? void 0 : user.toJSON());
 
           case 19:
           case "end":

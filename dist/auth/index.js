@@ -121,9 +121,13 @@ var authenticatePassword = /*#__PURE__*/function () {
             throw new InvalidPasswordException();
 
           case 10:
-            return _context.abrupt("return", user);
+            _context.next = 12;
+            return _User["default"].scope("public").findByPk(user.id);
 
-          case 11:
+          case 12:
+            return _context.abrupt("return", _context.sent);
+
+          case 13:
           case "end":
             return _context.stop();
         }

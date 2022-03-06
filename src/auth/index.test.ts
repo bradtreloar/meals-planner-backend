@@ -23,7 +23,7 @@ describe("authenticatePassword", () => {
       email,
       password: await hashPassword(password),
     });
-    const user = await User.findOne({
+    const user = await User.scope("public").findOne({
       where: {
         email,
       },
@@ -31,7 +31,7 @@ describe("authenticatePassword", () => {
 
     const result = await authenticatePassword(email, password);
 
-    expect(result).toStrictEqual(user);
+    expect(result.toJSON()).toStrictEqual(user?.toJSON());
   });
 
   it("throws error when password is incorrect", async () => {

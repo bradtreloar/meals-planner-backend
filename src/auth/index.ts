@@ -30,7 +30,7 @@ export const authenticatePassword = async (email: string, password: string) => {
   if (!isCorrectPassword) {
     throw new InvalidPasswordException();
   }
-  return user;
+  return (await User.scope("public").findByPk(user.id)) as User;
 };
 
 export const generateAccessToken = (user: User) => {
