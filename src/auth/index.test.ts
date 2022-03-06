@@ -1,17 +1,16 @@
 import initSequelize from "@app/database";
 import User from "@app/models/User";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JwtPayload, JsonWebTokenError } from "jsonwebtoken";
 import { faker } from "@faker-js/faker";
 import { random } from "lodash";
 import {
-  PASSWORD_SALT_ROUNDS,
   InvalidPasswordException,
   authenticatePassword,
   UserNotFoundException,
   generateAccessToken,
   verifyAccessToken,
+  hashPassword,
 } from ".";
 import { UserFactory } from "@app/factories/User";
 
@@ -22,7 +21,7 @@ describe("authenticatePassword", () => {
     const password = faker.random.alphaNumeric(20);
     await UserFactory.create({
       email,
-      password: await bcrypt.hash(password, PASSWORD_SALT_ROUNDS),
+      password: await hashPassword(password),
     });
     const user = await User.findOne({
       where: {
@@ -42,7 +41,7 @@ describe("authenticatePassword", () => {
     const incorrectPassword = password + faker.random.alphaNumeric(1);
     await UserFactory.create({
       email,
-      password: await bcrypt.hash(password, PASSWORD_SALT_ROUNDS),
+      password: await hashPassword(password),
     });
 
     await expect(
@@ -63,13 +62,13 @@ describe("authenticatePassword", () => {
 
 describe("generateAccessToken", () => {
   it("generates an access token from a user", () => {
-    const secret = faker.random.alphaNumeric(20);
+    const secret = process.env.SECRET as string;
     const user = UserFactory.build({
       id: Math.floor(random(1, 100)),
       email: faker.internet.email(),
     });
 
-    const token = generateAccessToken(user, secret);
+    const token = generateAccessToken(user);
     const payload = jwt.verify(token, secret) as JwtPayload;
 
     expect(payload.user).toStrictEqual({
@@ -81,14 +80,13 @@ describe("generateAccessToken", () => {
 
 describe("verifyAccessToken", () => {
   it("return payload from a valid access token", () => {
-    const secret = faker.random.alphaNumeric(20);
     const user = UserFactory.build({
       id: Math.floor(random(1, 100)),
       email: faker.internet.email(),
     });
-    const token = generateAccessToken(user, secret);
+    const token = generateAccessToken(user);
 
-    const payload = verifyAccessToken(token, secret) as JwtPayload;
+    const payload = verifyAccessToken(token) as JwtPayload;
 
     expect(payload.user).toStrictEqual({
       id: user.id,
@@ -97,11 +95,8 @@ describe("verifyAccessToken", () => {
   });
 
   it("throws an error when access token is invalid", () => {
-    const secret = faker.random.alphaNumeric(20);
-    const differentSecret = faker.random.alphaNumeric(20);
-    const user = UserFactory.build();
-    const token = generateAccessToken(user, differentSecret);
-
-    expect(() => verifyAccessToken(token, secret)).toThrow(JsonWebTokenError);
+    expect(() => verifyAccessToken(faker.random.alphaNumeric(20))).toThrow(
+      JsonWebTokenError
+    );
   });
 });

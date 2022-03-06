@@ -6,8 +6,6 @@ var _database = _interopRequireDefault(require("../database"));
 
 var _User = _interopRequireDefault(require("../models/User"));
 
-var _bcrypt = _interopRequireDefault(require("bcrypt"));
-
 var _jsonwebtoken = _interopRequireWildcard(require("jsonwebtoken"));
 
 var _faker = require("@faker-js/faker");
@@ -44,7 +42,7 @@ describe("authenticatePassword", function () {
             _context.t0 = _User2.UserFactory;
             _context.t1 = email;
             _context.next = 8;
-            return _bcrypt["default"].hash(password, _.PASSWORD_SALT_ROUNDS);
+            return (0, _.hashPassword)(password);
 
           case 8:
             _context.t2 = _context.sent;
@@ -95,7 +93,7 @@ describe("authenticatePassword", function () {
             _context2.t0 = _User2.UserFactory;
             _context2.t1 = email;
             _context2.next = 9;
-            return _bcrypt["default"].hash(password, _.PASSWORD_SALT_ROUNDS);
+            return (0, _.hashPassword)(password);
 
           case 9:
             _context2.t2 = _context2.sent;
@@ -142,14 +140,14 @@ describe("authenticatePassword", function () {
 });
 describe("generateAccessToken", function () {
   it("generates an access token from a user", function () {
-    var secret = _faker.faker.random.alphaNumeric(20);
+    var secret = process.env.SECRET;
 
     var user = _User2.UserFactory.build({
       id: Math.floor((0, _lodash.random)(1, 100)),
       email: _faker.faker.internet.email()
     });
 
-    var token = (0, _.generateAccessToken)(user, secret);
+    var token = (0, _.generateAccessToken)(user);
 
     var payload = _jsonwebtoken["default"].verify(token, secret);
 
@@ -161,30 +159,21 @@ describe("generateAccessToken", function () {
 });
 describe("verifyAccessToken", function () {
   it("return payload from a valid access token", function () {
-    var secret = _faker.faker.random.alphaNumeric(20);
-
     var user = _User2.UserFactory.build({
       id: Math.floor((0, _lodash.random)(1, 100)),
       email: _faker.faker.internet.email()
     });
 
-    var token = (0, _.generateAccessToken)(user, secret);
-    var payload = (0, _.verifyAccessToken)(token, secret);
+    var token = (0, _.generateAccessToken)(user);
+    var payload = (0, _.verifyAccessToken)(token);
     expect(payload.user).toStrictEqual({
       id: user.id,
       email: user.email
     });
   });
   it("throws an error when access token is invalid", function () {
-    var secret = _faker.faker.random.alphaNumeric(20);
-
-    var differentSecret = _faker.faker.random.alphaNumeric(20);
-
-    var user = _User2.UserFactory.build();
-
-    var token = (0, _.generateAccessToken)(user, differentSecret);
     expect(function () {
-      return (0, _.verifyAccessToken)(token, secret);
+      return (0, _.verifyAccessToken)(_faker.faker.random.alphaNumeric(20));
     }).toThrow(_jsonwebtoken.JsonWebTokenError);
   });
 });

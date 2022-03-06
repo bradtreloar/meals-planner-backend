@@ -5,7 +5,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.verifyAccessToken = exports.generateAccessToken = exports.authenticatePassword = exports.UserNotFoundException = exports.PASSWORD_SALT_ROUNDS = exports.InvalidPasswordException = exports.ACCESS_TOKEN_EXPIRES_IN = void 0;
+exports.verifyAccessToken = exports.hashPassword = exports.getSecret = exports.generateAccessToken = exports.authenticatePassword = exports.UserNotFoundException = exports.PASSWORD_SALT_ROUNDS = exports.InvalidPasswordException = exports.ACCESS_TOKEN_EXPIRES_IN = void 0;
 
 var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
 
@@ -138,21 +138,39 @@ var authenticatePassword = /*#__PURE__*/function () {
 
 exports.authenticatePassword = authenticatePassword;
 
-var generateAccessToken = function generateAccessToken(user, secret) {
+var generateAccessToken = function generateAccessToken(user) {
   return _jsonwebtoken["default"].sign({
     user: {
       id: user.id,
       email: user.email
     }
-  }, secret, {
+  }, getSecret(), {
     expiresIn: ACCESS_TOKEN_EXPIRES_IN
   });
 };
 
 exports.generateAccessToken = generateAccessToken;
 
-var verifyAccessToken = function verifyAccessToken(token, secret) {
-  return _jsonwebtoken["default"].verify(token, secret);
+var verifyAccessToken = function verifyAccessToken(token) {
+  return _jsonwebtoken["default"].verify(token, getSecret());
 };
 
 exports.verifyAccessToken = verifyAccessToken;
+
+var hashPassword = function hashPassword(password) {
+  return _bcrypt["default"].hash(password, PASSWORD_SALT_ROUNDS);
+};
+
+exports.hashPassword = hashPassword;
+
+var getSecret = function getSecret() {
+  var secret = process.env.SECRET;
+
+  if (secret === undefined) {
+    throw new Error("SECRET not set in environment");
+  }
+
+  return secret;
+};
+
+exports.getSecret = getSecret;

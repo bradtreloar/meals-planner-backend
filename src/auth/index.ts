@@ -33,7 +33,7 @@ export const authenticatePassword = async (email: string, password: string) => {
   return user;
 };
 
-export const generateAccessToken = (user: User, secret: string) => {
+export const generateAccessToken = (user: User) => {
   return jwt.sign(
     {
       user: {
@@ -41,10 +41,21 @@ export const generateAccessToken = (user: User, secret: string) => {
         email: user.email,
       },
     },
-    secret,
+    getSecret(),
     { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
   );
 };
 
-export const verifyAccessToken = (token: string, secret: string) =>
-  jwt.verify(token, secret) as JwtPayload;
+export const verifyAccessToken = (token: string) =>
+  jwt.verify(token, getSecret()) as JwtPayload;
+
+export const hashPassword = (password: string) =>
+  bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
+
+export const getSecret = () => {
+  const secret = process.env.SECRET;
+  if (secret === undefined) {
+    throw new Error("SECRET not set in environment");
+  }
+  return secret;
+};
