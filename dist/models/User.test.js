@@ -12,7 +12,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 describe("initUser", function () {
   it("returns model", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-    var sequelize, User, attributes, results, result;
+    var sequelize, User, attributes, result;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -32,15 +32,14 @@ describe("initUser", function () {
 
           case 7:
             _context.next = 9;
-            return User.findAll();
+            return User.findOne();
 
           case 9:
-            results = _context.sent;
-            result = results[0];
-            expect(result.email).toStrictEqual(attributes.email);
-            expect(result.password).toStrictEqual(attributes.password);
+            result = _context.sent;
+            expect(result === null || result === void 0 ? void 0 : result.email).toStrictEqual(attributes.email);
+            expect(result === null || result === void 0 ? void 0 : result.password).toStrictEqual(attributes.password);
 
-          case 13:
+          case 12:
           case "end":
             return _context.stop();
         }

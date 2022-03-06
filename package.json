@@ -2,7 +2,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "rimraf ./dist",
-    "build": "babel src --out-dir dist --extensions \".ts,.js\"",
+    "build": "yarn clean && babel src --out-dir dist --extensions \".ts,.js\"",
     "start": "node ./dist/index.js",
     "test": "jest --rootDir ./src"
   },

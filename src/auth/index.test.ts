@@ -29,7 +29,9 @@ describe("authenticatePassword", () => {
         email,
       },
     });
+
     const result = await authenticatePassword(email, password);
+
     expect(result).toStrictEqual(user);
   });
 
@@ -42,6 +44,7 @@ describe("authenticatePassword", () => {
       email,
       password: await bcrypt.hash(password, PASSWORD_SALT_ROUNDS),
     });
+
     await expect(
       authenticatePassword(email, incorrectPassword)
     ).rejects.toThrow(new InvalidPasswordException());
@@ -51,6 +54,7 @@ describe("authenticatePassword", () => {
     await initSequelize(":memory:");
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
+
     await expect(authenticatePassword(email, password)).rejects.toThrow(
       new UserNotFoundException()
     );
@@ -64,8 +68,10 @@ describe("generateAccessToken", () => {
       id: Math.floor(random(1, 100)),
       email: faker.internet.email(),
     });
+
     const token = generateAccessToken(user, secret);
     const payload = jwt.verify(token, secret) as JwtPayload;
+
     expect(payload.user).toStrictEqual({
       id: user.id,
       email: user.email,
@@ -81,7 +87,9 @@ describe("verifyAccessToken", () => {
       email: faker.internet.email(),
     });
     const token = generateAccessToken(user, secret);
+
     const payload = verifyAccessToken(token, secret) as JwtPayload;
+
     expect(payload.user).toStrictEqual({
       id: user.id,
       email: user.email,
@@ -93,6 +101,7 @@ describe("verifyAccessToken", () => {
     const differentSecret = faker.random.alphaNumeric(20);
     const user = UserFactory.build();
     const token = generateAccessToken(user, differentSecret);
+
     expect(() => verifyAccessToken(token, secret)).toThrow(JsonWebTokenError);
   });
 });

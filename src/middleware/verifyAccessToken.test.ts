@@ -21,7 +21,9 @@ describe("verifyAccessToken middleware", () => {
       },
     } as Request;
     const next = jest.fn();
+
     verifyAccessTokenMiddleware(secret)(req, {} as Response, next);
+
     expect(next).toHaveBeenCalled();
   });
 
@@ -39,7 +41,9 @@ describe("verifyAccessToken middleware", () => {
       },
     } as Request;
     const next = jest.fn();
+
     verifyAccessTokenMiddleware(secret)(req, {} as Response, next);
+
     expect(next).toHaveBeenCalled();
     expect(req.user).toStrictEqual({
       id: user.id,
@@ -60,7 +64,9 @@ describe("verifyAccessToken middleware", () => {
       status: mockResponseStatus,
     } as unknown as Response;
     const next = jest.fn();
+
     verifyAccessTokenMiddleware(secret)(req, res, next);
+
     expect(next).not.toHaveBeenCalled();
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
     expect(mockResponseJson).toHaveBeenCalledWith({
@@ -83,7 +89,9 @@ describe("verifyAccessToken middleware", () => {
       status: mockResponseStatus,
     } as unknown as Response;
     const next = jest.fn();
+
     verifyAccessTokenMiddleware(secret)(req, res, next);
+
     expect(next).not.toHaveBeenCalled();
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
     expect(mockResponseJson).toHaveBeenCalledWith({
@@ -108,7 +116,9 @@ describe("verifyAccessToken middleware", () => {
       status: mockResponseStatus,
     } as unknown as Response;
     const next = jest.fn();
+
     verifyAccessTokenMiddleware(secret)(req, res, next);
+    
     expect(next).not.toHaveBeenCalled();
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
     expect(mockResponseJson).toHaveBeenCalledWith({

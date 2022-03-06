@@ -39,7 +39,7 @@ describe("getSQLiteSequelize", function () {
 });
 describe("initModels", function () {
   it("defines models for sequelize instance", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-    var sequelize, attributes, results, result;
+    var sequelize, attributes, result;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -58,15 +58,14 @@ describe("initModels", function () {
 
           case 6:
             _context2.next = 8;
-            return _User["default"].findAll();
+            return _User["default"].findOne();
 
           case 8:
-            results = _context2.sent;
-            result = results[0];
-            expect(result.email).toStrictEqual(attributes.email);
-            expect(result.password).toStrictEqual(attributes.password);
+            result = _context2.sent;
+            expect(result === null || result === void 0 ? void 0 : result.email).toStrictEqual(attributes.email);
+            expect(result === null || result === void 0 ? void 0 : result.password).toStrictEqual(attributes.password);
 
-          case 12:
+          case 11:
           case "end":
             return _context2.stop();
         }
@@ -76,7 +75,7 @@ describe("initModels", function () {
 });
 describe("initSequelize", function () {
   it("initialises Sequelize instance and defines models", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
-    var attributes, results, result;
+    var attributes, result;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -94,15 +93,14 @@ describe("initSequelize", function () {
 
           case 5:
             _context3.next = 7;
-            return _User["default"].findAll();
+            return _User["default"].findOne();
 
           case 7:
-            results = _context3.sent;
-            result = results[0];
-            expect(result.email).toStrictEqual(attributes.email);
-            expect(result.password).toStrictEqual(attributes.password);
+            result = _context3.sent;
+            expect(result === null || result === void 0 ? void 0 : result.email).toStrictEqual(attributes.email);
+            expect(result === null || result === void 0 ? void 0 : result.password).toStrictEqual(attributes.password);
 
-          case 11:
+          case 10:
           case "end":
             return _context3.stop();
         }

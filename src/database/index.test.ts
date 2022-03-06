@@ -18,10 +18,10 @@ describe("initModels", () => {
       password: faker.random.alphaNumeric(20),
     };
     await User.create(attributes);
-    const results = await User.findAll();
-    const result = results[0];
-    expect(result.email).toStrictEqual(attributes.email);
-    expect(result.password).toStrictEqual(attributes.password);
+
+    const result = await User.findOne();
+    expect(result?.email).toStrictEqual(attributes.email);
+    expect(result?.password).toStrictEqual(attributes.password);
   });
 });
 
@@ -33,9 +33,9 @@ describe("initSequelize", () => {
       password: faker.random.alphaNumeric(20),
     };
     await User.create(attributes);
-    const results = await User.findAll();
-    const result = results[0];
-    expect(result.email).toStrictEqual(attributes.email);
-    expect(result.password).toStrictEqual(attributes.password);
+
+    const result = await User.findOne();
+    expect(result?.email).toStrictEqual(attributes.email);
+    expect(result?.password).toStrictEqual(attributes.password);
   });
 });
