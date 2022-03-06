@@ -5,11 +5,13 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.authenticateUser = exports.UserNotFoundException = exports.SALT_ROUNDS = exports.InvalidPasswordException = void 0;
+exports.verifyAccessToken = exports.generateAccessToken = exports.authenticatePassword = exports.UserNotFoundException = exports.PASSWORD_SALT_ROUNDS = exports.InvalidPasswordException = exports.ACCESS_TOKEN_EXPIRES_IN = void 0;
 
-var _User = _interopRequireDefault(require("../models/User"));
+var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
 
 var _bcrypt = _interopRequireDefault(require("bcrypt"));
+
+var _User = _interopRequireDefault(require("../models/User"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -43,8 +45,10 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-var SALT_ROUNDS = 10;
-exports.SALT_ROUNDS = SALT_ROUNDS;
+var PASSWORD_SALT_ROUNDS = 10;
+exports.PASSWORD_SALT_ROUNDS = PASSWORD_SALT_ROUNDS;
+var ACCESS_TOKEN_EXPIRES_IN = "1800s";
+exports.ACCESS_TOKEN_EXPIRES_IN = ACCESS_TOKEN_EXPIRES_IN;
 
 var UserNotFoundException = /*#__PURE__*/function (_Error) {
   _inherits(UserNotFoundException, _Error);
@@ -78,7 +82,7 @@ var InvalidPasswordException = /*#__PURE__*/function (_Error2) {
 
 exports.InvalidPasswordException = InvalidPasswordException;
 
-var authenticateUser = /*#__PURE__*/function () {
+var authenticatePassword = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(email, password) {
     var user, isCorrectPassword;
     return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -127,9 +131,28 @@ var authenticateUser = /*#__PURE__*/function () {
     }, _callee);
   }));
 
-  return function authenticateUser(_x, _x2) {
+  return function authenticatePassword(_x, _x2) {
     return _ref.apply(this, arguments);
   };
 }();
 
-exports.authenticateUser = authenticateUser;
+exports.authenticatePassword = authenticatePassword;
+
+var generateAccessToken = function generateAccessToken(user, secret) {
+  return _jsonwebtoken["default"].sign({
+    user: {
+      id: user.id,
+      email: user.email
+    }
+  }, secret, {
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN
+  });
+};
+
+exports.generateAccessToken = generateAccessToken;
+
+var verifyAccessToken = function verifyAccessToken(token, secret) {
+  return _jsonwebtoken["default"].verify(token, secret);
+};
+
+exports.verifyAccessToken = verifyAccessToken;
