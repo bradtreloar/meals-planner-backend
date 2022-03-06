@@ -15,7 +15,7 @@ export class InvalidPasswordException extends Error {
   }
 }
 
-export const authenticateUser = async (email: string, password: string) => {
+export const authenticatePassword = async (email: string, password: string) => {
   const user = await User.findOne({
     where: {
       email,

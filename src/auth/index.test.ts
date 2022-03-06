@@ -5,11 +5,11 @@ import bcrypt from "bcrypt";
 import {
   SALT_ROUNDS,
   InvalidPasswordException,
-  authenticateUser,
+  authenticatePassword,
   UserNotFoundException,
 } from ".";
 
-describe("authenticateUser", () => {
+describe("authenticatePassword", () => {
   it("verifies user with given email and password exists", async () => {
     await initSequelize(":memory:");
     const email = faker.internet.email();
@@ -23,7 +23,7 @@ describe("authenticateUser", () => {
         email,
       },
     });
-    const result = await authenticateUser(email, password);
+    const result = await authenticatePassword(email, password);
     expect(result).toStrictEqual(user);
   });
 
@@ -36,16 +36,16 @@ describe("authenticateUser", () => {
       email,
       password: await bcrypt.hash(password, SALT_ROUNDS),
     });
-    await expect(authenticateUser(email, incorrectPassword)).rejects.toThrow(
-      new InvalidPasswordException()
-    );
+    await expect(
+      authenticatePassword(email, incorrectPassword)
+    ).rejects.toThrow(new InvalidPasswordException());
   });
 
   it("throws error when email doesn't match any user", async () => {
     await initSequelize(":memory:");
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
-    await expect(authenticateUser(email, password)).rejects.toThrow(
+    await expect(authenticatePassword(email, password)).rejects.toThrow(
       new UserNotFoundException()
     );
   });
