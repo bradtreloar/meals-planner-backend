@@ -1,7 +1,9 @@
-import User from "@app/models/User";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import User from "@app/models/User";
 
-export const SALT_ROUNDS = 10;
+export const PASSWORD_SALT_ROUNDS = 10;
+export const ACCESS_TOKEN_EXPIRES_IN = "1800s";
 
 export class UserNotFoundException extends Error {
   constructor() {
@@ -30,3 +32,19 @@ export const authenticatePassword = async (email: string, password: string) => {
   }
   return user;
 };
+
+export const generateAccessToken = (user: User, secret: string) => {
+  return jwt.sign(
+    {
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+    },
+    secret,
+    { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
+  );
+};
+
+export const verifyAccessToken = (token: string, secret: string) =>
+  jwt.verify(token, secret) as JwtPayload;
