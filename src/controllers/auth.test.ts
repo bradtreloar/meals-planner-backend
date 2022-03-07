@@ -5,8 +5,9 @@ import User from "@app/models/User";
 import faker from "@faker-js/faker";
 import assert from "assert";
 import { Response } from "express";
-import { login, LoginRequest } from "./auth";
+import { login } from "./auth";
 import * as auth from "@app/auth";
+import { LoginRequest } from "./types";
 
 describe("login controller", () => {
   it("responds to valid request with user and access token", async () => {

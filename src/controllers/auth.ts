@@ -4,17 +4,9 @@ import {
   InvalidPasswordException,
   UserNotFoundException,
 } from "@app/auth";
-import { Request } from "express";
-import { Controller } from "./types";
+import { AsyncController, LoginRequest } from "./types";
 
-export interface LoginRequest extends Request {
-  body: {
-    email: string;
-    password: string;
-  };
-}
-
-export const login: Controller = async (req: LoginRequest, res) => {
+export const login: AsyncController = async (req: LoginRequest, res) => {
   const { email, password } = req.body;
   try {
     const user = await authenticatePassword(email, password);
