@@ -43,6 +43,8 @@ var UserFactory = /*#__PURE__*/function () {
     key: "create",
     value: function () {
       var _create = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(attributes) {
+        var _yield$User$create, id;
+
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -54,9 +56,15 @@ var UserFactory = /*#__PURE__*/function () {
                 }));
 
               case 2:
+                _yield$User$create = _context.sent;
+                id = _yield$User$create.id;
+                _context.next = 6;
+                return _User["default"].findByPk(id);
+
+              case 6:
                 return _context.abrupt("return", _context.sent);
 
-              case 3:
+              case 7:
               case "end":
                 return _context.stop();
             }

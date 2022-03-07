@@ -19,15 +19,11 @@ describe("authenticatePassword", () => {
     await initSequelize(":memory:");
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
-    await UserFactory.create({
+    const { id } = await UserFactory.create({
       email,
       password: await hashPassword(password),
     });
-    const user = await User.scope("public").findOne({
-      where: {
-        email,
-      },
-    });
+    const user = (await User.scope("public").findByPk(id)) as User;
 
     const result = await authenticatePassword(email, password);
 

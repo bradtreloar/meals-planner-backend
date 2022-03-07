@@ -28,7 +28,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 describe("authenticatePassword", function () {
   it("returns user when password is correct", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-    var email, password, user, result;
+    var email, password, _yield$UserFactory$cr, id, user, result;
+
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -54,23 +55,21 @@ describe("authenticatePassword", function () {
             return _context.t0.create.call(_context.t0, _context.t3);
 
           case 12:
-            _context.next = 14;
-            return _User["default"].scope("public").findOne({
-              where: {
-                email: email
-              }
-            });
+            _yield$UserFactory$cr = _context.sent;
+            id = _yield$UserFactory$cr.id;
+            _context.next = 16;
+            return _User["default"].scope("public").findByPk(id);
 
-          case 14:
+          case 16:
             user = _context.sent;
-            _context.next = 17;
+            _context.next = 19;
             return (0, _.authenticatePassword)(email, password);
 
-          case 17:
+          case 19:
             result = _context.sent;
             expect(result.toJSON()).toStrictEqual(user === null || user === void 0 ? void 0 : user.toJSON());
 
-          case 19:
+          case 21:
           case "end":
             return _context.stop();
         }
