@@ -20,7 +20,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 describe("verifyAccessToken middleware", function () {
   it("calls next middleware when token is valid", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-    var secret, users, user, token, encodedToken, req, next;
+    var users, user, token, encodedToken, req, next;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -29,18 +29,17 @@ describe("verifyAccessToken middleware", function () {
             return (0, _database["default"])(":memory:");
 
           case 2:
-            secret = _faker["default"].random.alphaNumeric(20);
-            _context.next = 5;
+            _context.next = 4;
             return _User.UserFactory.create();
 
-          case 5:
-            _context.next = 7;
+          case 4:
+            _context.next = 6;
             return _User2["default"].findAll();
 
-          case 7:
+          case 6:
             users = _context.sent;
             user = users.shift();
-            token = (0, _auth.generateAccessToken)(user, secret);
+            token = (0, _auth.generateAccessToken)(user);
             encodedToken = Buffer.from(token).toString("base64");
             req = {
               headers: {
@@ -48,10 +47,10 @@ describe("verifyAccessToken middleware", function () {
               }
             };
             next = jest.fn();
-            (0, _verifyAccessToken["default"])(secret)(req, {}, next);
+            (0, _verifyAccessToken["default"])(req, {}, next);
             expect(next).toHaveBeenCalled();
 
-          case 15:
+          case 14:
           case "end":
             return _context.stop();
         }
@@ -59,7 +58,7 @@ describe("verifyAccessToken middleware", function () {
     }, _callee);
   })));
   it("decorates request with user payload", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-    var secret, users, user, token, encodedToken, req, next;
+    var users, user, token, encodedToken, req, next;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -68,18 +67,17 @@ describe("verifyAccessToken middleware", function () {
             return (0, _database["default"])(":memory:");
 
           case 2:
-            secret = _faker["default"].random.alphaNumeric(20);
-            _context2.next = 5;
+            _context2.next = 4;
             return _User.UserFactory.create();
 
-          case 5:
-            _context2.next = 7;
+          case 4:
+            _context2.next = 6;
             return _User2["default"].findAll();
 
-          case 7:
+          case 6:
             users = _context2.sent;
             user = users.shift();
-            token = (0, _auth.generateAccessToken)(user, secret);
+            token = (0, _auth.generateAccessToken)(user);
             encodedToken = Buffer.from(token).toString("base64");
             req = {
               headers: {
@@ -87,14 +85,14 @@ describe("verifyAccessToken middleware", function () {
               }
             };
             next = jest.fn();
-            (0, _verifyAccessToken["default"])(secret)(req, {}, next);
+            (0, _verifyAccessToken["default"])(req, {}, next);
             expect(next).toHaveBeenCalled();
             expect(req.user).toStrictEqual({
               id: user.id,
               email: user.email
             });
 
-          case 16:
+          case 15:
           case "end":
             return _context2.stop();
         }
@@ -102,12 +100,11 @@ describe("verifyAccessToken middleware", function () {
     }, _callee2);
   })));
   it("sets 401 response and error when token not found", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
-    var secret, req, mockResponseJson, mockResponseStatus, res, next;
+    var req, mockResponseJson, mockResponseStatus, res, next;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            secret = _faker["default"].random.alphaNumeric(20);
             req = {
               headers: {}
             };
@@ -119,14 +116,14 @@ describe("verifyAccessToken middleware", function () {
               status: mockResponseStatus
             };
             next = jest.fn();
-            (0, _verifyAccessToken["default"])(secret)(req, res, next);
+            (0, _verifyAccessToken["default"])(req, res, next);
             expect(next).not.toHaveBeenCalled();
             expect(mockResponseStatus).toHaveBeenCalledWith(401);
             expect(mockResponseJson).toHaveBeenCalledWith({
               error: "Access token not found"
             });
 
-          case 10:
+          case 9:
           case "end":
             return _context3.stop();
         }
@@ -134,12 +131,11 @@ describe("verifyAccessToken middleware", function () {
     }, _callee3);
   })));
   it("sets 401 response and error when authZ header is invalid", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
-    var secret, req, mockResponseJson, mockResponseStatus, res, next;
+    var req, mockResponseJson, mockResponseStatus, res, next;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            secret = _faker["default"].random.alphaNumeric(20);
             req = {
               headers: {
                 authorization: "".concat(_faker["default"].random.alphaNumeric(20))
@@ -153,14 +149,14 @@ describe("verifyAccessToken middleware", function () {
               status: mockResponseStatus
             };
             next = jest.fn();
-            (0, _verifyAccessToken["default"])(secret)(req, res, next);
+            (0, _verifyAccessToken["default"])(req, res, next);
             expect(next).not.toHaveBeenCalled();
             expect(mockResponseStatus).toHaveBeenCalledWith(401);
             expect(mockResponseJson).toHaveBeenCalledWith({
               error: "Invalid access token"
             });
 
-          case 10:
+          case 9:
           case "end":
             return _context4.stop();
         }
@@ -168,12 +164,11 @@ describe("verifyAccessToken middleware", function () {
     }, _callee4);
   })));
   it("sets 401 response and error when token is invalid", /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
-    var secret, token, encodedToken, req, mockResponseJson, mockResponseStatus, res, next;
+    var token, encodedToken, req, mockResponseJson, mockResponseStatus, res, next;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            secret = _faker["default"].random.alphaNumeric(20);
             token = _faker["default"].random.alphaNumeric(20);
             encodedToken = Buffer.from(token).toString("base64");
             req = {
@@ -189,14 +184,14 @@ describe("verifyAccessToken middleware", function () {
               status: mockResponseStatus
             };
             next = jest.fn();
-            (0, _verifyAccessToken["default"])(secret)(req, res, next);
+            (0, _verifyAccessToken["default"])(req, res, next);
             expect(next).not.toHaveBeenCalled();
             expect(mockResponseStatus).toHaveBeenCalledWith(401);
             expect(mockResponseJson).toHaveBeenCalledWith({
               error: "Could not verify access token"
             });
 
-          case 12:
+          case 11:
           case "end":
             return _context5.stop();
         }

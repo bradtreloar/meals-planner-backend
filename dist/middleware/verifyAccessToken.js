@@ -21,41 +21,39 @@ function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Sy
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-var verifyAccessTokenMiddleware = function verifyAccessTokenMiddleware(secret) {
-  return function (req, res, next) {
-    var bearerToken = req.headers["authorization"];
+var verifyAccessTokenMiddleware = function verifyAccessTokenMiddleware(req, res, next) {
+  var bearerToken = req.headers["authorization"];
 
-    if (bearerToken !== undefined) {
-      var _bearerToken$split = bearerToken.split(" "),
-          _bearerToken$split2 = _slicedToArray(_bearerToken$split, 2),
-          type = _bearerToken$split2[0],
-          encodedToken = _bearerToken$split2[1];
+  if (bearerToken !== undefined) {
+    var _bearerToken$split = bearerToken.split(" "),
+        _bearerToken$split2 = _slicedToArray(_bearerToken$split, 2),
+        type = _bearerToken$split2[0],
+        encodedToken = _bearerToken$split2[1];
 
-      if (type !== "Bearer") {
-        res.status(401).json({
-          error: "Invalid access token"
-        });
-      } else {
-        var token = Buffer.from(encodedToken, "base64").toString();
+    if (type !== "Bearer") {
+      res.status(401).json({
+        error: "Invalid access token"
+      });
+    } else {
+      var token = Buffer.from(encodedToken, "base64").toString();
 
-        try {
-          var payload = (0, _auth.verifyAccessToken)(token, secret);
-          req.user = payload.user;
-          next();
-        } catch (error) {
-          if (error instanceof _jsonwebtoken.JsonWebTokenError) {
-            res.status(401).json({
-              error: "Could not verify access token"
-            });
-          }
+      try {
+        var payload = (0, _auth.verifyAccessToken)(token);
+        req.user = payload.user;
+        next();
+      } catch (error) {
+        if (error instanceof _jsonwebtoken.JsonWebTokenError) {
+          res.status(401).json({
+            error: "Could not verify access token"
+          });
         }
       }
-    } else {
-      res.status(401).json({
-        error: "Access token not found"
-      });
     }
-  };
+  } else {
+    res.status(401).json({
+      error: "Access token not found"
+    });
+  }
 };
 
 var _default = verifyAccessTokenMiddleware;

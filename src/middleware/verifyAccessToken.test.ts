@@ -9,11 +9,10 @@ import { Request, Response } from "express";
 describe("verifyAccessToken middleware", () => {
   it("calls next middleware when token is valid", async () => {
     await initSequelize(":memory:");
-    const secret = faker.random.alphaNumeric(20);
     await UserFactory.create();
     const users = await User.findAll();
     const user = users.shift() as User;
-    const token = generateAccessToken(user, secret);
+    const token = generateAccessToken(user);
     const encodedToken = Buffer.from(token).toString("base64");
     const req = {
       headers: {
@@ -22,18 +21,18 @@ describe("verifyAccessToken middleware", () => {
     } as Request;
     const next = jest.fn();
 
-    verifyAccessTokenMiddleware(secret)(req, {} as Response, next);
+    verifyAccessTokenMiddleware(req, {} as Response, next);
 
     expect(next).toHaveBeenCalled();
   });
 
   it("decorates request with user payload", async () => {
     await initSequelize(":memory:");
-    const secret = faker.random.alphaNumeric(20);
+
     await UserFactory.create();
     const users = await User.findAll();
     const user = users.shift() as User;
-    const token = generateAccessToken(user, secret);
+    const token = generateAccessToken(user);
     const encodedToken = Buffer.from(token).toString("base64");
     const req = {
       headers: {
@@ -42,7 +41,7 @@ describe("verifyAccessToken middleware", () => {
     } as Request;
     const next = jest.fn();
 
-    verifyAccessTokenMiddleware(secret)(req, {} as Response, next);
+    verifyAccessTokenMiddleware(req, {} as Response, next);
 
     expect(next).toHaveBeenCalled();
     expect(req.user).toStrictEqual({
@@ -52,7 +51,6 @@ describe("verifyAccessToken middleware", () => {
   });
 
   it("sets 401 response and error when token not found", async () => {
-    const secret = faker.random.alphaNumeric(20);
     const req = {
       headers: {},
     } as Request;
@@ -65,7 +63,7 @@ describe("verifyAccessToken middleware", () => {
     } as unknown as Response;
     const next = jest.fn();
 
-    verifyAccessTokenMiddleware(secret)(req, res, next);
+    verifyAccessTokenMiddleware(req, res, next);
 
     expect(next).not.toHaveBeenCalled();
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
@@ -75,7 +73,6 @@ describe("verifyAccessToken middleware", () => {
   });
 
   it("sets 401 response and error when authZ header is invalid", async () => {
-    const secret = faker.random.alphaNumeric(20);
     const req = {
       headers: {
         authorization: `${faker.random.alphaNumeric(20)}`,
@@ -90,7 +87,7 @@ describe("verifyAccessToken middleware", () => {
     } as unknown as Response;
     const next = jest.fn();
 
-    verifyAccessTokenMiddleware(secret)(req, res, next);
+    verifyAccessTokenMiddleware(req, res, next);
 
     expect(next).not.toHaveBeenCalled();
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
@@ -100,7 +97,6 @@ describe("verifyAccessToken middleware", () => {
   });
 
   it("sets 401 response and error when token is invalid", async () => {
-    const secret = faker.random.alphaNumeric(20);
     const token = faker.random.alphaNumeric(20);
     const encodedToken = Buffer.from(token).toString("base64");
     const req = {
@@ -117,8 +113,8 @@ describe("verifyAccessToken middleware", () => {
     } as unknown as Response;
     const next = jest.fn();
 
-    verifyAccessTokenMiddleware(secret)(req, res, next);
-    
+    verifyAccessTokenMiddleware(req, res, next);
+
     expect(next).not.toHaveBeenCalled();
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
     expect(mockResponseJson).toHaveBeenCalledWith({
