@@ -1,12 +1,9 @@
-import express from "express";
-import indexRouter from "@app/routes";
+import createApp from "./app";
 
 const PORT = 3000;
 
-const app = express();
-
-app.use(indexRouter);
+const app = createApp();
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`);
+  console.log(`Listening on port ${PORT}`);
 });
