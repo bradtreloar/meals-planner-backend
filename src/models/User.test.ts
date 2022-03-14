@@ -1,37 +1,33 @@
-import { getSQLiteSequelize } from "@app/database";
+import initSequelize from "@app/database";
 import { faker } from "@faker-js/faker";
-import { initUser } from "./User";
+import User from "./User";
 
-describe("initUser", () => {
-  it("returns model", async () => {
-    const sequelize = getSQLiteSequelize(":memory:");
-    const User = initUser(sequelize);
-    await sequelize.sync();
-    const attributes = {
-      email: faker.internet.email(),
-      password: faker.random.alphaNumeric(20),
-    };
+beforeEach(async () => {
+  await initSequelize(":memory:");
+});
 
-    await User.create(attributes);
-    const result = await User.findOne();
+it("returns model", async () => {
+  const attributes = {
+    email: faker.internet.email(),
+    password: faker.random.alphaNumeric(20),
+  };
 
-    expect(result?.email).toStrictEqual(attributes.email);
-    expect(result?.password).toStrictEqual(attributes.password);
-  });
+  await User.create(attributes);
+  const result = await User.findOne();
 
-  it("omits password from public scope", async () => {
-    const sequelize = getSQLiteSequelize(":memory:");
-    const User = initUser(sequelize);
-    await sequelize.sync();
-    const attributes = {
-      email: faker.internet.email(),
-      password: faker.random.alphaNumeric(20),
-    };
+  expect(result?.email).toStrictEqual(attributes.email);
+  expect(result?.password).toStrictEqual(attributes.password);
+});
 
-    await User.create(attributes);
-    const result = await User.scope("public").findOne();
+it("omits password from public scope", async () => {
+  const attributes = {
+    email: faker.internet.email(),
+    password: faker.random.alphaNumeric(20),
+  };
 
-    expect(result?.email).toStrictEqual(attributes.email);
-    expect(result?.password).toBeUndefined();
-  });
+  await User.create(attributes);
+  const result = await User.scope("public").findOne();
+
+  expect(result?.email).toStrictEqual(attributes.email);
+  expect(result?.password).toBeUndefined();
 });
