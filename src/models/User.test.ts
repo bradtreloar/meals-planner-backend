@@ -6,7 +6,7 @@ beforeEach(async () => {
   await initSequelize(":memory:");
 });
 
-it("returns model", async () => {
+it("creates instance of model", async () => {
   const attributes = {
     email: faker.internet.email(),
     password: faker.random.alphaNumeric(20),
