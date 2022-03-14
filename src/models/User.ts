@@ -12,6 +12,9 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<number>;
   declare email: string;
   declare password: string;
+
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export const initUser = (sequelize: Sequelize) => {
@@ -26,6 +29,8 @@ export const initUser = (sequelize: Sequelize) => {
         type: new DataTypes.STRING(2048),
         allowNull: false,
       },
+      createdAt: DataTypes.DATE,
+      updatedAt: DataTypes.DATE,
     },
     {
       scopes: {
