@@ -1,7 +1,7 @@
 import { hashPassword } from "@app/auth";
 import initSequelize from "@app/database";
 import { UserFactory } from "@app/factories/User";
-import User from "@app/models/User";
+import { User } from "@app/models";
 import faker from "@faker-js/faker";
 import assert from "assert";
 import { Response } from "express";

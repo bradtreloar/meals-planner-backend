@@ -1,6 +1,6 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import User from "@app/models/User";
+import { User } from "@app/models";
 
 export const PASSWORD_SALT_ROUNDS = 10;
 export const ACCESS_TOKEN_EXPIRES_IN = "1800s";

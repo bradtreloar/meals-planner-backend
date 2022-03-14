@@ -1,4 +1,24 @@
-import { Model } from "sequelize/types";
+import Crypto from "crypto";
+import { DataTypes, Model } from "sequelize";
+
+export const primaryKey = () => ({
+  type: DataTypes.INTEGER,
+  autoIncrement: true,
+  primaryKey: true,
+});
+
+export const requiredForeignKey = () => ({
+  type: DataTypes.INTEGER,
+  allowNull: false,
+});
+
+export const timestamps = () => ({
+  createdAt: DataTypes.DATE,
+  updatedAt: DataTypes.DATE,
+});
+
+export const randomRefreshTokenValue = (length: number) =>
+  Crypto.randomBytes(length).toString("base64").slice(0, length);
 
 /**
  * Serialises and deserialises model JSON to ensure date fields are strings.

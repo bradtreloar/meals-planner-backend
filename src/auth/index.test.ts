@@ -1,5 +1,5 @@
 import initSequelize from "@app/database";
-import User from "@app/models/User";
+import { User } from "@app/models";
 import jwt from "jsonwebtoken";
 import { JwtPayload, JsonWebTokenError } from "jsonwebtoken";
 import { faker } from "@faker-js/faker";

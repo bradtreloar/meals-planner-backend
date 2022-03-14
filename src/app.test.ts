@@ -4,8 +4,8 @@ import initSequelize from "./database";
 import { UserFactory } from "./factories/User";
 import faker from "@faker-js/faker";
 import { hashPassword } from "./auth";
-import User from "./models/User";
 import { modelToJSON } from "./models/helpers";
+import { User } from "@app/models";
 
 beforeEach(() => {
   initSequelize(":memory:");
