@@ -1,27 +1,20 @@
-import { DataTypes, Model, Optional, Sequelize } from "sequelize";
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  Sequelize,
+} from "sequelize";
 import { primaryKey } from ".";
 
-export interface UserAttributes {
-  id: number;
-  email: string;
-  password: string;
-}
-
-export interface UserInput extends Optional<UserAttributes, "id"> {}
-
-export interface UserOutput extends Required<UserAttributes> {}
-
-class User extends Model<UserAttributes, UserInput> {
-  declare id: number;
+class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+  declare id: CreationOptional<number>;
   declare email: string;
   declare password: string;
-
-  declare readonly createdAt: Date;
-  declare readonly updatedAt: Date;
-  declare readonly deletedAt: Date;
 }
 
-export const initUser = (sequelize: Sequelize) =>
+export const initUser = (sequelize: Sequelize) => {
   User.init(
     {
       id: primaryKey(),
@@ -43,8 +36,9 @@ export const initUser = (sequelize: Sequelize) =>
         },
       },
       sequelize,
-      tableName: "Users",
     }
   );
+  return User;
+};
 
 export default User;
