@@ -66,7 +66,7 @@ export class RefreshToken extends Model<
   InferAttributes<RefreshToken>,
   InferCreationAttributes<RefreshToken>
 > {
-  declare id: CreationOptional<number>;
+  declare id: CreationOptional<string>;
   declare userID: number;
 
   declare createdAt: CreationOptional<Date>;

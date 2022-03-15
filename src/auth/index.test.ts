@@ -1,5 +1,5 @@
 import initSequelize from "@app/database";
-import { User } from "@app/models";
+import { RefreshToken, User } from "@app/models";
 import jwt from "jsonwebtoken";
 import { JwtPayload, JsonWebTokenError } from "jsonwebtoken";
 import { faker } from "@faker-js/faker";
@@ -11,12 +11,19 @@ import {
   generateAccessToken,
   verifyAccessToken,
   hashPassword,
+  generateRefreshToken,
+  authenticateRefreshToken,
+  InvalidRefreshTokenException,
+  deleteRefreshToken,
 } from ".";
 import { UserFactory } from "@app/factories/User";
 
 describe("authenticatePassword", () => {
-  it("returns user when password is correct", async () => {
+  beforeEach(async () => {
     await initSequelize(":memory:");
+  });
+
+  it("returns user when password is correct", async () => {
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
     const { id } = await UserFactory.create({
@@ -31,7 +38,6 @@ describe("authenticatePassword", () => {
   });
 
   it("throws error when password is incorrect", async () => {
-    await initSequelize(":memory:");
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
     const incorrectPassword = password + faker.random.alphaNumeric(1);
@@ -42,16 +48,15 @@ describe("authenticatePassword", () => {
 
     await expect(
       authenticatePassword(email, incorrectPassword)
-    ).rejects.toThrow(new InvalidPasswordException());
+    ).rejects.toThrow(InvalidPasswordException);
   });
 
   it("throws error when email doesn't match any user", async () => {
-    await initSequelize(":memory:");
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
 
     await expect(authenticatePassword(email, password)).rejects.toThrow(
-      new UserNotFoundException()
+      UserNotFoundException
     );
   });
 });
@@ -93,6 +98,65 @@ describe("verifyAccessToken", () => {
   it("throws an error when access token is invalid", () => {
     expect(() => verifyAccessToken(faker.random.alphaNumeric(20))).toThrow(
       JsonWebTokenError
+    );
+  });
+});
+
+describe("generateRefreshToken", () => {
+  beforeEach(async () => {
+    await initSequelize(":memory:");
+  });
+
+  it("generates a refresh token for a user", async () => {
+    const user = await UserFactory.create();
+
+    const token = await generateRefreshToken(user);
+
+    expect(token.userID).toBe(user.id);
+  });
+});
+
+describe("authenticateRefreshToken", () => {
+  beforeEach(async () => {
+    await initSequelize(":memory:");
+  });
+
+  it("returns user when refresh token exists", async () => {
+    const user = await UserFactory.create();
+    const token = await user.createRefreshToken();
+
+    const owner = await authenticateRefreshToken(token.id);
+
+    expect(owner?.toJSON()).toStrictEqual(user?.toJSON());
+  });
+
+  it("throws error when refresh token does not exist", async () => {
+    const tokenID = faker.random.alphaNumeric(64);
+    await expect(authenticateRefreshToken(tokenID)).rejects.toThrow(
+      InvalidRefreshTokenException
+    );
+  });
+});
+
+describe("deleteRefreshToken", () => {
+  beforeEach(async () => {
+    await initSequelize(":memory:");
+  });
+
+  it("deletes refresh token", async () => {
+    const user = await UserFactory.create();
+    const token = await user.createRefreshToken();
+
+    deleteRefreshToken(token);
+
+    const result = await RefreshToken.findAll();
+    expect(result).toHaveLength(0);
+  });
+
+  it("throws error when refresh token does not exist", async () => {
+    const tokenID = faker.random.alphaNumeric(64);
+    await expect(authenticateRefreshToken(tokenID)).rejects.toThrow(
+      InvalidRefreshTokenException
     );
   });
 });
