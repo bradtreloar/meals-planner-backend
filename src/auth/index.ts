@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { RefreshToken, User } from "@app/models";
 
 export const PASSWORD_SALT_ROUNDS = 10;
-export const ACCESS_TOKEN_EXPIRES_IN = "1800s";
+export const ACCESS_TOKEN_EXPIRES_IN = 1800; // in seconds
 
 export class UserNotFoundException extends Error {
   constructor() {
@@ -48,7 +48,7 @@ export const generateAccessToken = (user: User) => {
       },
     },
     getSecret(),
-    { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
+    { expiresIn: `${ACCESS_TOKEN_EXPIRES_IN}s` }
   );
 };
 
@@ -68,7 +68,7 @@ export const authenticateRefreshToken = async (tokenID: string) => {
   return token.getUser();
 };
 
-export const deleteRefreshToken = async (token: RefreshToken) => {
+export const revokeRefreshToken = async (token: RefreshToken) => {
   await token.destroy();
 };
 

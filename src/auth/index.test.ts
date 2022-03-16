@@ -14,7 +14,7 @@ import {
   generateRefreshToken,
   authenticateRefreshToken,
   InvalidRefreshTokenException,
-  deleteRefreshToken,
+  revokeRefreshToken,
 } from ".";
 import { UserFactory } from "@app/factories/User";
 
@@ -138,7 +138,7 @@ describe("authenticateRefreshToken", () => {
   });
 });
 
-describe("deleteRefreshToken", () => {
+describe("revokeRefreshToken", () => {
   beforeEach(async () => {
     await initSequelize(":memory:");
   });
@@ -147,7 +147,7 @@ describe("deleteRefreshToken", () => {
     const user = await UserFactory.create();
     const token = await user.createRefreshToken();
 
-    deleteRefreshToken(token);
+    revokeRefreshToken(token);
 
     const result = await RefreshToken.findAll();
     expect(result).toHaveLength(0);
