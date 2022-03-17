@@ -129,8 +129,9 @@ describe("authenticateRefreshToken", () => {
     const user = await UserFactory.create();
     const token = await user.createRefreshToken();
 
-    const owner = await authenticateRefreshToken(token.id);
+    const [retrievedToken, owner] = await authenticateRefreshToken(token.id);
 
+    expect(retrievedToken?.toJSON()).toStrictEqual(token?.toJSON());
     expect(owner?.toJSON()).toStrictEqual(user?.toJSON());
   });
 
@@ -152,8 +153,9 @@ describe("authenticateRefreshToken", () => {
       updatedAt: tokenDate,
     });
 
-    const owner = await authenticateRefreshToken(token.id);
+    const [retrievedToken, owner] = await authenticateRefreshToken(token.id);
 
+    expect(retrievedToken?.toJSON()).toStrictEqual(token?.toJSON());
     expect(owner?.toJSON()).toStrictEqual(user?.toJSON());
   });
 

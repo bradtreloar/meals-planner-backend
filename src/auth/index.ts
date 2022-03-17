@@ -68,7 +68,9 @@ export const generateRefreshToken = async (user: User) => {
   return (await RefreshToken.findByPk(id)) as RefreshToken;
 };
 
-export const authenticateRefreshToken = async (tokenID: string) => {
+export const authenticateRefreshToken = async (
+  tokenID: string
+): Promise<[RefreshToken, User]> => {
   const token = await RefreshToken.findByPk(tokenID);
   if (token === null) {
     throw new InvalidRefreshTokenException();
@@ -79,7 +81,8 @@ export const authenticateRefreshToken = async (tokenID: string) => {
     await revokeRefreshToken(token);
     throw new ExpiredRefreshTokenException();
   }
-  return token.getUser();
+  const owner = await token.getUser();
+  return [token, owner];
 };
 
 export const revokeRefreshToken = async (token: RefreshToken) => {
