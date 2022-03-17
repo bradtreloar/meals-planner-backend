@@ -1,3 +1,5 @@
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 import createApp from "./app";
 
 const PORT = 3000;
