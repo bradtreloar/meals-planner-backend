@@ -7,8 +7,8 @@ import { hashPassword } from "./auth";
 import { modelToJSON } from "./models/helpers";
 import { User } from "@app/models";
 
-beforeEach(() => {
-  initSequelize(":memory:");
+beforeEach(async () => {
+  await initSequelize(":memory:");
 });
 
 describe("example endpoint", () => {
@@ -33,5 +33,7 @@ describe("/auth endpoints", () => {
       password: plainPassword,
     });
     expect(res.body.user).toStrictEqual(modelToJSON(user));
+    expect(res.body.accessToken).not.toBeUndefined();
+    expect(res.body.refreshToken).not.toBeUndefined();
   });
 });
