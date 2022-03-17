@@ -36,4 +36,15 @@ describe("/auth endpoints", () => {
     expect(res.body.accessToken).not.toBeUndefined();
     expect(res.body.refreshToken).not.toBeUndefined();
   });
+
+  it("/auth/refresh calls auth.refresh controller", async () => {
+    const user = await UserFactory.create();
+    const token = await user.createRefreshToken();
+    const app = createApp();
+    const res = await supertest(app).post("/auth/refresh").send({
+      refreshToken: token.id,
+    });
+    expect(res.body.accessToken).not.toBeUndefined();
+    expect(res.body.refreshToken).not.toBeUndefined();
+  });
 });
