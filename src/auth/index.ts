@@ -1,9 +1,11 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { RefreshToken, User } from "@app/models";
+import { DateTime } from "luxon";
 
 export const PASSWORD_SALT_ROUNDS = 10;
-export const ACCESS_TOKEN_EXPIRES_IN = 1800; // in seconds
+export const ACCESS_TOKEN_EXPIRES_IN = 1800; // 15 minutes, in seconds
+export const REFRESH_TOKEN_EXPIRES_IN = 2592000; // 30 days, in seconds
 
 export class UserNotFoundException extends Error {
   constructor() {
@@ -20,6 +22,12 @@ export class InvalidPasswordException extends Error {
 export class InvalidRefreshTokenException extends Error {
   constructor() {
     super("Invalid refresh token");
+  }
+}
+
+export class ExpiredRefreshTokenException extends Error {
+  constructor() {
+    super("Expired refresh token");
   }
 }
 
@@ -64,6 +72,12 @@ export const authenticateRefreshToken = async (tokenID: string) => {
   const token = await RefreshToken.findByPk(tokenID);
   if (token === null) {
     throw new InvalidRefreshTokenException();
+  }
+  const tokenDate = DateTime.fromJSDate(token.createdAt);
+  const tokenAge = Math.abs(tokenDate.diffNow().as("seconds"));
+  if (tokenAge > REFRESH_TOKEN_EXPIRES_IN) {
+    await revokeRefreshToken(token);
+    throw new ExpiredRefreshTokenException();
   }
   return token.getUser();
 };

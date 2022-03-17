@@ -15,8 +15,12 @@ import {
   authenticateRefreshToken,
   InvalidRefreshTokenException,
   revokeRefreshToken,
+  ExpiredRefreshTokenException,
+  REFRESH_TOKEN_EXPIRES_IN,
 } from ".";
 import { UserFactory } from "@app/factories/User";
+import { RefreshTokenFactory } from "@app/factories/RefreshToken";
+import { mockNow } from "@app/setupTestsAfterEnv";
 
 describe("authenticatePassword", () => {
   beforeEach(async () => {
@@ -132,9 +136,58 @@ describe("authenticateRefreshToken", () => {
 
   it("throws error when refresh token does not exist", async () => {
     const tokenID = faker.random.alphaNumeric(64);
+
     await expect(authenticateRefreshToken(tokenID)).rejects.toThrow(
       InvalidRefreshTokenException
     );
+  });
+
+  it("returns user when refresh token at maximum age", async () => {
+    const user = await UserFactory.create();
+    const tokenDate = mockNow
+      .minus({ seconds: REFRESH_TOKEN_EXPIRES_IN })
+      .toJSDate();
+    const token = await RefreshTokenFactory.create(user, {
+      createdAt: tokenDate,
+      updatedAt: tokenDate,
+    });
+
+    const owner = await authenticateRefreshToken(token.id);
+
+    expect(owner?.toJSON()).toStrictEqual(user?.toJSON());
+  });
+
+  it("throws error when refresh token has expired", async () => {
+    const user = await UserFactory.create();
+    const tokenDate = mockNow
+      .minus({ seconds: REFRESH_TOKEN_EXPIRES_IN + 1 })
+      .toJSDate();
+    const token = await RefreshTokenFactory.create(user, {
+      createdAt: tokenDate,
+      updatedAt: tokenDate,
+    });
+
+    await expect(authenticateRefreshToken(token.id)).rejects.toThrow(
+      ExpiredRefreshTokenException
+    );
+  });
+
+  it("deletes expired token", async () => {
+    const user = await UserFactory.create();
+    const tokenDate = mockNow
+      .minus({ seconds: REFRESH_TOKEN_EXPIRES_IN + 1 })
+      .toJSDate();
+    const token = await RefreshTokenFactory.create(user, {
+      createdAt: tokenDate,
+      updatedAt: tokenDate,
+    });
+
+    await expect(authenticateRefreshToken(token.id)).rejects.toThrow(
+      ExpiredRefreshTokenException
+    );
+
+    const tokens = await RefreshToken.findAll();
+    expect(tokens).toHaveLength(0);
   });
 });
 
@@ -155,6 +208,7 @@ describe("revokeRefreshToken", () => {
 
   it("throws error when refresh token does not exist", async () => {
     const tokenID = faker.random.alphaNumeric(64);
+
     await expect(authenticateRefreshToken(tokenID)).rejects.toThrow(
       InvalidRefreshTokenException
     );
