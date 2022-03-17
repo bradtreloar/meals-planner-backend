@@ -1,6 +1,6 @@
 import createApp from "./app";
 import supertest from "supertest";
-import initInMemorySequelize from "./database";
+import { initInMemorySequelize } from "./database";
 import { UserFactory } from "./factories/User";
 import faker from "@faker-js/faker";
 import { hashPassword } from "./auth";

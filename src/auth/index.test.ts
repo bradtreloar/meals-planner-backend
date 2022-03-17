@@ -1,4 +1,4 @@
-import initInMemorySequelize from "@app/database";
+import { initInMemorySequelize } from "@app/database";
 import { RefreshToken, User } from "@app/models";
 import jwt from "jsonwebtoken";
 import { JwtPayload, JsonWebTokenError } from "jsonwebtoken";

@@ -1,5 +1,5 @@
 import { hashPassword } from "@app/auth";
-import initInMemorySequelize from "@app/database";
+import { initInMemorySequelize } from "@app/database";
 import { UserFactory } from "@app/factories/User";
 import { RefreshToken, User } from "@app/models";
 import faker from "@faker-js/faker";

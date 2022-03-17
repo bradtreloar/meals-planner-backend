@@ -1,4 +1,4 @@
-import initInMemorySequelize, { getSQLiteSequelize } from ".";
+import { initInMemorySequelize, getSQLiteSequelize } from ".";
 import { faker } from "@faker-js/faker";
 import { User } from "@app/models";
 

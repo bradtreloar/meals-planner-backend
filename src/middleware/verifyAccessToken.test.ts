@@ -1,5 +1,5 @@
 import { generateAccessToken } from "@app/auth";
-import initInMemorySequelize from "@app/database";
+import { initInMemorySequelize } from "@app/database";
 import { UserFactory } from "@app/factories/User";
 import verifyAccessTokenMiddleware from "@app/middleware/verifyAccessToken";
 import { User } from "@app/models";
