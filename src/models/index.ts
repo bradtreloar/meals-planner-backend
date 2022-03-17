@@ -15,9 +15,29 @@ import {
   timestamps,
 } from "./helpers";
 
+type ModelDefinition = (sequelize: Sequelize) => void;
+type AssociationsDefinition = () => void;
+
+const models = {
+  modelDefinitions: [] as ModelDefinition[],
+  associationsDefinitions: [] as AssociationsDefinition[],
+};
+
+const addModel = (
+  modelDefinition: ModelDefinition,
+  associationsDefinition: AssociationsDefinition
+) => {
+  models.modelDefinitions.push(modelDefinition);
+  models.associationsDefinitions.push(associationsDefinition);
+};
+
 export const initModels = async (sequelize: Sequelize) => {
-  initUser(sequelize);
-  initRefreshToken(sequelize);
+  for (let modelDefinition of models.modelDefinitions) {
+    modelDefinition(sequelize);
+  }
+  for (let associationsDefinition of models.associationsDefinitions) {
+    associationsDefinition();
+  }
   await sequelize.sync();
 };
 
@@ -35,32 +55,39 @@ export class User extends Model<
   declare createRefreshToken: HasManyCreateAssociationMixin<RefreshToken>;
 }
 
-export const initUser = (sequelize: Sequelize) => {
-  User.init(
-    {
-      id: primaryKey(),
-      email: {
-        type: new DataTypes.STRING(128),
-        allowNull: false,
+addModel(
+  (sequelize: Sequelize) => {
+    User.init(
+      {
+        id: primaryKey(),
+        email: {
+          type: new DataTypes.STRING(128),
+          allowNull: false,
+        },
+        password: {
+          type: new DataTypes.STRING(2048),
+          allowNull: false,
+        },
+        ...timestamps(),
       },
-      password: {
-        type: new DataTypes.STRING(2048),
-        allowNull: false,
-      },
-      ...timestamps(),
-    },
-    {
-      scopes: {
-        public: {
-          attributes: {
-            exclude: ["password"],
+      {
+        scopes: {
+          public: {
+            attributes: {
+              exclude: ["password"],
+            },
           },
         },
-      },
-      sequelize,
-    }
-  );
-};
+        sequelize,
+      }
+    );
+  },
+  () => {
+    User.hasMany(RefreshToken, {
+      foreignKey: "userID",
+    });
+  }
+);
 
 export class RefreshToken extends Model<
   InferAttributes<RefreshToken>,
@@ -75,30 +102,31 @@ export class RefreshToken extends Model<
   declare getUser: BelongsToGetAssociationMixin<User>;
 }
 
-export const initRefreshToken = (sequelize: Sequelize) => {
-  const idLength = 64;
+addModel(
+  (sequelize: Sequelize) => {
+    const idLength = 64;
 
-  RefreshToken.init(
-    {
-      id: {
-        type: DataTypes.STRING(idLength),
-        defaultValue: () => randomRefreshTokenValue(idLength),
-        primaryKey: true,
+    RefreshToken.init(
+      {
+        id: {
+          type: DataTypes.STRING(idLength),
+          defaultValue: () => randomRefreshTokenValue(idLength),
+          primaryKey: true,
+        },
+        userID: requiredForeignKey(),
+        ...timestamps(),
       },
-      userID: requiredForeignKey(),
-      ...timestamps(),
-    },
-    {
-      sequelize,
-    }
-  );
-  User.hasMany(RefreshToken, {
-    foreignKey: "userID",
-  });
-  RefreshToken.belongsTo(User, {
-    foreignKey: {
-      name: "userID",
-      allowNull: false,
-    },
-  });
-};
+      {
+        sequelize,
+      }
+    );
+  },
+  () => {
+    RefreshToken.belongsTo(User, {
+      foreignKey: {
+        name: "userID",
+        allowNull: false,
+      },
+    });
+  }
+);
