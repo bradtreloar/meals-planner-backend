@@ -40,6 +40,8 @@
     "typescript": "^4.6.2"
   },
   "babel": {
+    "sourceMaps": true,
+    "retainLines": true,
     "presets": [
       "@babel/preset-env",
       [
