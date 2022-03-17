@@ -8,3 +8,9 @@ export interface LoginRequest extends Request {
     password: string;
   };
 }
+
+export interface RefreshRequest extends Request {
+  body: {
+    refreshToken: string;
+  };
+}

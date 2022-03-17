@@ -5,9 +5,10 @@ import { RefreshToken, User } from "@app/models";
 import faker from "@faker-js/faker";
 import assert from "assert";
 import { Response } from "express";
-import { login } from "./auth";
+import { login, refresh } from "./auth";
 import * as auth from "@app/auth";
-import { LoginRequest } from "./types";
+import { LoginRequest, RefreshRequest } from "./types";
+import { RefreshTokenFactory } from "@app/factories/RefreshToken";
 
 describe("login controller", () => {
   it("responds to valid request with user and access/refresh tokens", async () => {
@@ -102,6 +103,62 @@ describe("login controller", () => {
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
     expect(mockResponseJson).toHaveBeenCalledWith({
       error: "Invalid email or password",
+    });
+  });
+});
+
+describe("refresh controller", () => {
+  it("responds to valid request with new access/refresh tokens", async () => {
+    await initSequelize(":memory:");
+    const user = await UserFactory.create();
+    const refreshToken = await RefreshTokenFactory.create(user);
+    const req = {
+      body: {
+        refreshToken: refreshToken.id,
+      },
+    } as RefreshRequest;
+    const mockResponseJson = jest.fn();
+    const mockResponseStatus = jest.fn().mockReturnValue({
+      json: mockResponseJson,
+    });
+    const res = {
+      status: mockResponseStatus,
+    } as unknown as Response;
+    const accessToken = faker.random.alphaNumeric(20);
+    // @ts-expect-error
+    auth.generateAccessToken = jest.fn().mockReturnValue(accessToken);
+
+    await refresh(req, res);
+
+    const newRefreshToken = (await RefreshToken.findOne()) as RefreshToken;
+    expect(newRefreshToken.id).not.toBe(refreshToken.id);
+    expect(mockResponseStatus).toHaveBeenCalledWith(200);
+    expect(mockResponseJson).toHaveBeenCalledWith({
+      accessToken,
+      refreshToken: newRefreshToken.id,
+    });
+  });
+
+  it("responds to invalid token with an error", async () => {
+    await initSequelize(":memory:");
+    const req = {
+      body: {
+        refreshToken: faker.random.alphaNumeric(64),
+      },
+    } as RefreshRequest;
+    const mockResponseJson = jest.fn();
+    const mockResponseStatus = jest.fn().mockReturnValue({
+      json: mockResponseJson,
+    });
+    const res = {
+      status: mockResponseStatus,
+    } as unknown as Response;
+
+    await refresh(req, res);
+
+    expect(mockResponseStatus).toHaveBeenCalledWith(401);
+    expect(mockResponseJson).toHaveBeenCalledWith({
+      error: "Invalid refresh token",
     });
   });
 });
