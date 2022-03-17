@@ -6,8 +6,8 @@ This is a study project, and is a work-in-progress.
 
 ## Planned features
 
-- Postgres database.
-- JWT based authentication.
+- Postgres database, using Sequelize ORM.
+- OAuth 2.0 authentication using JWT access tokens.
 - Password-based login and signup.
 - Anonymous user signup with email verification.
 - GraphQL API to query data.
