@@ -8,10 +8,10 @@ export const getSQLiteSequelize = (storage: string) =>
     logging: false,
   });
 
-const initSequelize = async (storage: string) => {
-  const sequelize = getSQLiteSequelize(storage);
+const initInMemorySequelize = async () => {
+  const sequelize = getSQLiteSequelize(":memory:");
   await initModels(sequelize);
   return sequelize;
 };
 
-export default initSequelize;
+export default initInMemorySequelize;

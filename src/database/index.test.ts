@@ -1,4 +1,4 @@
-import initSequelize, { getSQLiteSequelize } from ".";
+import initInMemorySequelize, { getSQLiteSequelize } from ".";
 import { faker } from "@faker-js/faker";
 import { User } from "@app/models";
 
@@ -11,7 +11,7 @@ describe("getSQLiteSequelize", () => {
 
 describe("initSequelize", () => {
   it("initialises Sequelize instance and defines models", async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
     const attributes = {
       email: faker.internet.email(),
       password: faker.random.alphaNumeric(20),

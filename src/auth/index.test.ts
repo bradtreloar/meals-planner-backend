@@ -1,4 +1,4 @@
-import initSequelize from "@app/database";
+import initInMemorySequelize from "@app/database";
 import { RefreshToken, User } from "@app/models";
 import jwt from "jsonwebtoken";
 import { JwtPayload, JsonWebTokenError } from "jsonwebtoken";
@@ -24,7 +24,7 @@ import { mockNow } from "@app/setupTestsAfterEnv";
 
 describe("authenticatePassword", () => {
   beforeEach(async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
   });
 
   it("returns user when password is correct", async () => {
@@ -108,7 +108,7 @@ describe("verifyAccessToken", () => {
 
 describe("generateRefreshToken", () => {
   beforeEach(async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
   });
 
   it("generates a refresh token for a user", async () => {
@@ -122,7 +122,7 @@ describe("generateRefreshToken", () => {
 
 describe("authenticateRefreshToken", () => {
   beforeEach(async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
   });
 
   it("returns user when refresh token exists", async () => {
@@ -195,7 +195,7 @@ describe("authenticateRefreshToken", () => {
 
 describe("revokeRefreshToken", () => {
   beforeEach(async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
   });
 
   it("deletes refresh token", async () => {

@@ -1,6 +1,6 @@
 import createApp from "./app";
 import supertest from "supertest";
-import initSequelize from "./database";
+import initInMemorySequelize from "./database";
 import { UserFactory } from "./factories/User";
 import faker from "@faker-js/faker";
 import { hashPassword } from "./auth";
@@ -8,7 +8,7 @@ import { modelToJSON } from "./models/helpers";
 import { User } from "@app/models";
 
 beforeEach(async () => {
-  await initSequelize(":memory:");
+  await initInMemorySequelize();
 });
 
 describe("example endpoint", () => {

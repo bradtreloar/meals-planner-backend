@@ -1,5 +1,5 @@
 import { generateAccessToken } from "@app/auth";
-import initSequelize from "@app/database";
+import initInMemorySequelize from "@app/database";
 import { UserFactory } from "@app/factories/User";
 import verifyAccessTokenMiddleware from "@app/middleware/verifyAccessToken";
 import { User } from "@app/models";
@@ -8,7 +8,7 @@ import { Request, Response } from "express";
 
 describe("verifyAccessToken middleware", () => {
   it("calls next middleware when token is valid", async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
     await UserFactory.create();
     const users = await User.findAll();
     const user = users.shift() as User;
@@ -27,7 +27,7 @@ describe("verifyAccessToken middleware", () => {
   });
 
   it("decorates request with user payload", async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
 
     await UserFactory.create();
     const users = await User.findAll();

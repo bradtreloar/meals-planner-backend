@@ -1,4 +1,4 @@
-import initSequelize, { getSQLiteSequelize } from "@app/database";
+import initInMemorySequelize, { getSQLiteSequelize } from "@app/database";
 import { UserFactory } from "@app/factories/User";
 import { faker } from "@faker-js/faker";
 import { initModels, RefreshToken, User } from ".";
@@ -21,7 +21,7 @@ describe("initModels", () => {
 
 describe("User", () => {
   beforeEach(async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
   });
 
   it("creates instance of User", async () => {
@@ -53,7 +53,7 @@ describe("User", () => {
 
 describe("RefreshToken", () => {
   beforeEach(async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
   });
 
   it("creates instance of RefreshToken", async () => {

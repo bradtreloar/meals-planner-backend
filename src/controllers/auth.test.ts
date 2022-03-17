@@ -1,5 +1,5 @@
 import { hashPassword } from "@app/auth";
-import initSequelize from "@app/database";
+import initInMemorySequelize from "@app/database";
 import { UserFactory } from "@app/factories/User";
 import { RefreshToken, User } from "@app/models";
 import faker from "@faker-js/faker";
@@ -12,7 +12,7 @@ import { RefreshTokenFactory } from "@app/factories/RefreshToken";
 
 describe("login controller", () => {
   it("responds to valid request with user and access/refresh tokens", async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
     const plainPassword = faker.random.alphaNumeric(20);
     const hashedPassword = await hashPassword(plainPassword);
     await UserFactory.create({
@@ -49,7 +49,7 @@ describe("login controller", () => {
   });
 
   it("responds to invalid email with an error", async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
     const req = {
@@ -75,7 +75,7 @@ describe("login controller", () => {
   });
 
   it("responds to invalid password with an error", async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
     const plainPassword = faker.random.alphaNumeric(20);
     const incorreCtPassword = faker.random.alphaNumeric(20);
     const hashedPassword = await hashPassword(plainPassword);
@@ -109,7 +109,7 @@ describe("login controller", () => {
 
 describe("refresh controller", () => {
   it("responds to valid request with new access/refresh tokens", async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
     const user = await UserFactory.create();
     const refreshToken = await RefreshTokenFactory.create(user);
     const req = {
@@ -140,7 +140,7 @@ describe("refresh controller", () => {
   });
 
   it("responds to invalid token with an error", async () => {
-    await initSequelize(":memory:");
+    await initInMemorySequelize();
     const req = {
       body: {
         refreshToken: faker.random.alphaNumeric(64),
