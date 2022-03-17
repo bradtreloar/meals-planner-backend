@@ -10,9 +10,11 @@ export const login: AsyncController = async (req: LoginRequest, res) => {
   const { email, password } = req.body;
   try {
     const user = await authenticatePassword(email, password);
+    const refreshToken = await user.createRefreshToken();
     res.status(200).json({
       user: user.toJSON(),
       accessToken: generateAccessToken(user),
+      refreshToken: refreshToken.id,
     });
   } catch (error) {
     if (

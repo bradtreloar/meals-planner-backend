@@ -1,7 +1,7 @@
 import { hashPassword } from "@app/auth";
 import initSequelize from "@app/database";
 import { UserFactory } from "@app/factories/User";
-import { User } from "@app/models";
+import { RefreshToken, User } from "@app/models";
 import faker from "@faker-js/faker";
 import assert from "assert";
 import { Response } from "express";
@@ -10,7 +10,7 @@ import * as auth from "@app/auth";
 import { LoginRequest } from "./types";
 
 describe("login controller", () => {
-  it("responds to valid request with user and access token", async () => {
+  it("responds to valid request with user and access/refresh tokens", async () => {
     await initSequelize(":memory:");
     const plainPassword = faker.random.alphaNumeric(20);
     const hashedPassword = await hashPassword(plainPassword);
@@ -32,16 +32,18 @@ describe("login controller", () => {
     const res = {
       status: mockResponseStatus,
     } as unknown as Response;
-    const token = faker.random.alphaNumeric(20);
+    const accessToken = faker.random.alphaNumeric(20);
     // @ts-expect-error
-    auth.generateAccessToken = jest.fn().mockReturnValue(token);
+    auth.generateAccessToken = jest.fn().mockReturnValue(accessToken);
 
     await login(req, res);
 
+    const refreshToken = (await RefreshToken.findOne()) as RefreshToken;
     expect(mockResponseStatus).toHaveBeenCalledWith(200);
     expect(mockResponseJson).toHaveBeenCalledWith({
       user: user.toJSON(),
-      accessToken: token,
+      accessToken,
+      refreshToken: refreshToken.id,
     });
   });
 
