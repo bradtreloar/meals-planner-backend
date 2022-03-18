@@ -1,12 +1,12 @@
 import {
   authenticatePassword,
-  authenticateRefreshToken,
-  ExpiredRefreshTokenException,
+  authenticateToken,
+  ExpiredTokenException,
   generateAccessToken,
   generateRefreshToken,
   InvalidPasswordException,
-  InvalidRefreshTokenException,
-  revokeRefreshToken,
+  InvalidTokenException,
+  revokeToken,
   UserNotFoundException,
 } from "@app/auth";
 import { AsyncController, LoginRequest, RefreshRequest } from "./types";
@@ -36,20 +36,20 @@ export const login: AsyncController = async (req: LoginRequest, res) => {
 export const refresh: AsyncController = async (req: RefreshRequest, res) => {
   const { refreshToken: refreshTokenID } = req.body;
   try {
-    const [refreshToken, user] = await authenticateRefreshToken(refreshTokenID);
-    revokeRefreshToken(refreshToken);
-    const newRefreshToken = await user.createRefreshToken();
+    const [refreshToken, user] = await authenticateToken(refreshTokenID);
+    revokeToken(refreshToken);
+    const newRefreshToken = await generateRefreshToken(user);
     res.status(200).json({
       accessToken: generateAccessToken(user),
       refreshToken: newRefreshToken.id,
     });
   } catch (error) {
     if (
-      error instanceof ExpiredRefreshTokenException ||
-      error instanceof InvalidRefreshTokenException
+      error instanceof ExpiredTokenException ||
+      error instanceof InvalidTokenException
     ) {
       res.status(401).json({
-        error: "Invalid refresh token",
+        error: "Invalid token",
       });
     }
   }

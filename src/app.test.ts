@@ -6,6 +6,7 @@ import faker from "@faker-js/faker";
 import { hashPassword } from "./auth";
 import { modelToJSON } from "./models/helpers";
 import { User } from "@app/models";
+import { TokenFactory } from "./factories/Token";
 
 beforeEach(async () => {
   await initInMemorySequelize();
@@ -39,7 +40,7 @@ describe("/auth endpoints", () => {
 
   it("/auth/refresh calls auth.refresh controller", async () => {
     const user = await UserFactory.create();
-    const token = await user.createRefreshToken();
+    const token = await TokenFactory.create(user);
     const app = createApp();
     const res = await supertest(app).post("/auth/refresh").send({
       refreshToken: token.id,

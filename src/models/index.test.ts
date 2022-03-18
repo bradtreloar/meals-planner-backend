@@ -1,7 +1,8 @@
 import { initInMemorySequelize, getSQLiteSequelize } from "@app/database";
 import { UserFactory } from "@app/factories/User";
+import { mockNow } from "@app/setupTestsAfterEnv";
 import { faker } from "@faker-js/faker";
-import { initModels, RefreshToken, User } from ".";
+import { initModels, Token, User } from ".";
 
 describe("initModels", () => {
   it("defines models for sequelize instance", async () => {
@@ -51,39 +52,19 @@ describe("User", () => {
   });
 });
 
-describe("RefreshToken", () => {
+describe("Token", () => {
   beforeEach(async () => {
     await initInMemorySequelize();
   });
 
-  it("creates instance of RefreshToken", async () => {
+  it("creates instance of Token owned by User", async () => {
     const user = await UserFactory.create();
 
-    await RefreshToken.create({
+    await Token.create({
       userID: user.id,
+      expiresAt: mockNow.toJSDate(),
     });
-    const result = await RefreshToken.findOne();
-
-    expect(result?.userID).toStrictEqual(user.id);
-  });
-
-  it("creates instance of RefreshToken owned by User", async () => {
-    const user = await UserFactory.create();
-
-    await RefreshToken.create({
-      userID: user.id,
-    });
-    const result = await RefreshToken.findOne();
-
-    expect(result?.userID).toStrictEqual(user.id);
-    expect(await result?.getUser()).toStrictEqual(user);
-  });
-
-  it("creates instance of RefreshToken using User", async () => {
-    const user = await UserFactory.create();
-
-    await user.createRefreshToken();
-    const result = await RefreshToken.findOne();
+    const result = await Token.findOne();
 
     expect(result?.userID).toStrictEqual(user.id);
     expect(await result?.getUser()).toStrictEqual(user);

@@ -1,5 +1,4 @@
-"use strict";function _typeof(obj) {"@babel/helpers - typeof";return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {return typeof obj;} : function (obj) {return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;}, _typeof(obj);}Object.defineProperty(exports, "__esModule", { value: true });exports.initModels = exports.User = exports.RefreshToken = void 0;var _sequelize = require("sequelize");
-
+"use strict";function _typeof(obj) {"@babel/helpers - typeof";return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {return typeof obj;} : function (obj) {return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;}, _typeof(obj);}Object.defineProperty(exports, "__esModule", { value: true });exports.initModels = exports.User = exports.Token = void 0;var _sequelize = require("sequelize");
 
 
 
@@ -53,8 +52,6 @@ User = /*#__PURE__*/function (_Model) {_inherits(User, _Model);var _super = _cre
 
 
 
-
-
 addModel(
 function (sequelize) {
   User.init(_objectSpread({
@@ -83,13 +80,14 @@ function (sequelize) {
 
 },
 function () {
-  User.hasMany(RefreshToken, {
+  User.hasMany(Token, {
     foreignKey: "userID" });
 
 });var
 
 
-RefreshToken = /*#__PURE__*/function (_Model2) {_inherits(RefreshToken, _Model2);var _super2 = _createSuper(RefreshToken);function RefreshToken() {_classCallCheck(this, RefreshToken);return _super2.apply(this, arguments);}return _createClass(RefreshToken);}(_sequelize.Model);exports.RefreshToken = RefreshToken;
+Token = /*#__PURE__*/function (_Model2) {_inherits(Token, _Model2);var _super2 = _createSuper(Token);function Token() {_classCallCheck(this, Token);return _super2.apply(this, arguments);}return _createClass(Token);}(_sequelize.Model);exports.Token = Token;
+
 
 
 
@@ -106,14 +104,18 @@ addModel(
 function (sequelize) {
   var idLength = 64;
 
-  RefreshToken.init(_objectSpread({
+  Token.init(_objectSpread({
 
     id: {
       type: _sequelize.DataTypes.STRING(idLength),
-      defaultValue: function defaultValue() {return (0, _helpers.randomRefreshTokenValue)(idLength);},
+      defaultValue: function defaultValue() {return (0, _helpers.randomTokenValue)(idLength);},
       primaryKey: true },
 
-    userID: (0, _helpers.requiredForeignKey)() },
+    userID: (0, _helpers.requiredForeignKey)(),
+    expiresAt: {
+      type: _sequelize.DataTypes.DATE,
+      allowNull: false } },
+
   (0, _helpers.timestamps)()),
 
   {
@@ -122,7 +124,7 @@ function (sequelize) {
 
 },
 function () {
-  RefreshToken.belongsTo(User, {
+  Token.belongsTo(User, {
     foreignKey: {
       name: "userID",
       allowNull: false } });

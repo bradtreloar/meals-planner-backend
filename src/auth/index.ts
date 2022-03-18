@@ -1,12 +1,12 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { PasswordResetToken, RefreshToken, User } from "@app/models";
+import { Token, User } from "@app/models";
 import { DateTime } from "luxon";
 
 export const PASSWORD_SALT_ROUNDS = 10;
-export const ACCESS_TOKEN_EXPIRES_IN = 1800; // 15 minutes, in seconds.
-export const REFRESH_TOKEN_EXPIRES_IN = 2592000; // 30 days, in seconds.
-export const PASSWORD_RESET_TOKEN_EXPIRES_IN = 1800; // 15 minutes, in seconds.
+export const ACCESS_TOKEN_AGE = 1800; // 15 minutes, in seconds.
+export const REFRESH_TOKEN_AGE = 2592000; // 30 days, in seconds.
+export const PASSWORD_RESET_TOKEN_AGE = 1800; // 15 minutes, in seconds.
 
 export class UserNotFoundException extends Error {
   constructor() {
@@ -20,27 +20,15 @@ export class InvalidPasswordException extends Error {
   }
 }
 
-export class InvalidRefreshTokenException extends Error {
+export class InvalidTokenException extends Error {
   constructor() {
-    super("Invalid refresh token");
+    super("Invalid token");
   }
 }
 
-export class InvalidPasswordResetTokenException extends Error {
+export class ExpiredTokenException extends Error {
   constructor() {
-    super("Invalid password reset token");
-  }
-}
-
-export class ExpiredRefreshTokenException extends Error {
-  constructor() {
-    super("Expired refresh token");
-  }
-}
-
-export class ExpiredPasswordResetTokenException extends Error {
-  constructor() {
-    super("Expired password reset token");
+    super("Expired token");
   }
 }
 
@@ -69,7 +57,7 @@ export const generateAccessToken = (user: User) => {
       },
     },
     getSecret(),
-    { expiresIn: `${ACCESS_TOKEN_EXPIRES_IN}s` }
+    { expiresIn: `${ACCESS_TOKEN_AGE}s` }
   );
 };
 
@@ -77,28 +65,38 @@ export const verifyAccessToken = (token: string) =>
   jwt.verify(token, getSecret()) as JwtPayload;
 
 export const generateRefreshToken = async (user: User) => {
-  const { id } = await user.createRefreshToken();
-  return (await RefreshToken.findByPk(id)) as RefreshToken;
+  return await Token.create({
+    userID: user.id,
+    expiresAt: DateTime.utc().plus({ seconds: REFRESH_TOKEN_AGE }).toJSDate(),
+  });
 };
 
-export const authenticateRefreshToken = async (
+export const generatePasswordResetToken = async (user: User) => {
+  return await Token.create({
+    userID: user.id,
+    expiresAt: DateTime.utc()
+      .plus({ seconds: PASSWORD_RESET_TOKEN_AGE })
+      .toJSDate(),
+  });
+};
+
+export const authenticateToken = async (
   tokenID: string
-): Promise<[RefreshToken, User]> => {
-  const token = await RefreshToken.findByPk(tokenID);
+): Promise<[Token, User]> => {
+  const token = await Token.findByPk(tokenID);
   if (token === null) {
-    throw new InvalidRefreshTokenException();
+    throw new InvalidTokenException();
   }
-  const tokenDate = DateTime.fromJSDate(token.createdAt);
-  const tokenAge = Math.abs(tokenDate.diffNow().as("seconds"));
-  if (tokenAge > REFRESH_TOKEN_EXPIRES_IN) {
-    await revokeRefreshToken(token);
-    throw new ExpiredRefreshTokenException();
+  const expiresAt = DateTime.fromJSDate(token.expiresAt);
+  if (expiresAt.diffNow().toMillis() < 0) {
+    await revokeToken(token);
+    throw new ExpiredTokenException();
   }
   const owner = await token.getUser();
   return [token, owner];
 };
 
-export const revokeRefreshToken = async (token: RefreshToken) => {
+export const revokeToken = async (token: Token) => {
   await token.destroy();
 };
 
@@ -111,30 +109,4 @@ export const getSecret = () => {
     throw new Error("SECRET not set in environment");
   }
   return secret;
-};
-
-export const generatePasswordResetToken = async (user: User) => {
-  const token = await user.createPasswordResetToken();
-  return token;
-};
-
-export const authenticatePasswordResetToken = async (
-  tokenID: string
-): Promise<[PasswordResetToken, User]> => {
-  const token = await PasswordResetToken.findByPk(tokenID);
-  if (token === null) {
-    throw new InvalidPasswordResetTokenException();
-  }
-  const tokenDate = DateTime.fromJSDate(token.createdAt);
-  const tokenAge = Math.abs(tokenDate.diffNow().as("seconds"));
-  if (tokenAge > PASSWORD_RESET_TOKEN_EXPIRES_IN) {
-    await revokePasswordResetToken(token);
-    throw new ExpiredPasswordResetTokenException();
-  }
-  const owner = await token.getUser();
-  return [token, owner];
-};
-
-export const revokePasswordResetToken = async (token: PasswordResetToken) => {
-  await token.destroy();
 };

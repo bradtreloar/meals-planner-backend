@@ -1,14 +1,14 @@
 import { hashPassword } from "@app/auth";
 import { initInMemorySequelize } from "@app/database";
 import { UserFactory } from "@app/factories/User";
-import { RefreshToken, User } from "@app/models";
+import { Token, User } from "@app/models";
 import faker from "@faker-js/faker";
 import assert from "assert";
 import { Response } from "express";
 import { login, refresh } from "./auth";
 import * as auth from "@app/auth";
 import { LoginRequest, RefreshRequest } from "./types";
-import { RefreshTokenFactory } from "@app/factories/RefreshToken";
+import { TokenFactory } from "@app/factories/Token";
 
 describe("login controller", () => {
   it("responds to valid request with user and access/refresh tokens", async () => {
@@ -39,7 +39,7 @@ describe("login controller", () => {
 
     await login(req, res);
 
-    const refreshToken = (await RefreshToken.findOne()) as RefreshToken;
+    const refreshToken = (await Token.findOne()) as Token;
     expect(mockResponseStatus).toHaveBeenCalledWith(200);
     expect(mockResponseJson).toHaveBeenCalledWith({
       user: user.toJSON(),
@@ -111,7 +111,7 @@ describe("refresh controller", () => {
   it("responds to valid request with new access/refresh tokens", async () => {
     await initInMemorySequelize();
     const user = await UserFactory.create();
-    const refreshToken = await RefreshTokenFactory.create(user);
+    const refreshToken = await TokenFactory.create(user);
     const req = {
       body: {
         refreshToken: refreshToken.id,
@@ -130,7 +130,8 @@ describe("refresh controller", () => {
 
     await refresh(req, res);
 
-    const newRefreshToken = (await RefreshToken.findOne()) as RefreshToken;
+    expect(await Token.findAll()).toHaveLength(1);
+    const newRefreshToken = (await Token.findOne()) as Token;
     expect(newRefreshToken.id).not.toBe(refreshToken.id);
     expect(mockResponseStatus).toHaveBeenCalledWith(200);
     expect(mockResponseJson).toHaveBeenCalledWith({
@@ -158,7 +159,7 @@ describe("refresh controller", () => {
 
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
     expect(mockResponseJson).toHaveBeenCalledWith({
-      error: "Invalid refresh token",
+      error: "Invalid token",
     });
   });
 });

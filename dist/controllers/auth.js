@@ -33,22 +33,22 @@ var login = /*#__PURE__*/function () {var _ref = _asyncToGenerator( /*#__PURE__*
 
 
 
-var refresh = /*#__PURE__*/function () {var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(req, res) {var refreshTokenID, _yield$authenticateRe, _yield$authenticateRe2, refreshToken, user, newRefreshToken;return regeneratorRuntime.wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:
+var refresh = /*#__PURE__*/function () {var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(req, res) {var refreshTokenID, _yield$authenticateTo, _yield$authenticateTo2, refreshToken, user, newRefreshToken;return regeneratorRuntime.wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:
             refreshTokenID = req.body.refreshToken;_context2.prev = 1;_context2.next = 4;return (
 
-              (0, _auth.authenticateRefreshToken)(refreshTokenID));case 4:_yield$authenticateRe = _context2.sent;_yield$authenticateRe2 = _slicedToArray(_yield$authenticateRe, 2);refreshToken = _yield$authenticateRe2[0];user = _yield$authenticateRe2[1];
-            (0, _auth.revokeRefreshToken)(refreshToken);_context2.next = 11;return (
-              user.createRefreshToken());case 11:newRefreshToken = _context2.sent;
+              (0, _auth.authenticateToken)(refreshTokenID));case 4:_yield$authenticateTo = _context2.sent;_yield$authenticateTo2 = _slicedToArray(_yield$authenticateTo, 2);refreshToken = _yield$authenticateTo2[0];user = _yield$authenticateTo2[1];
+            (0, _auth.revokeToken)(refreshToken);_context2.next = 11;return (
+              (0, _auth.generateRefreshToken)(user));case 11:newRefreshToken = _context2.sent;
             res.status(200).json({
               accessToken: (0, _auth.generateAccessToken)(user),
               refreshToken: newRefreshToken.id });_context2.next = 18;break;case 15:_context2.prev = 15;_context2.t0 = _context2["catch"](1);
 
 
             if (
-            _context2.t0 instanceof _auth.ExpiredRefreshTokenException ||
-            _context2.t0 instanceof _auth.InvalidRefreshTokenException)
+            _context2.t0 instanceof _auth.ExpiredTokenException ||
+            _context2.t0 instanceof _auth.InvalidTokenException)
             {
               res.status(401).json({
-                error: "Invalid refresh token" });
+                error: "Invalid token" });
 
             }case 18:case "end":return _context2.stop();}}}, _callee2, null, [[1, 15]]);}));return function refresh(_x3, _x4) {return _ref2.apply(this, arguments);};}();exports.refresh = refresh;
