@@ -1,11 +1,12 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { RefreshToken, User } from "@app/models";
+import { PasswordResetToken, RefreshToken, User } from "@app/models";
 import { DateTime } from "luxon";
 
 export const PASSWORD_SALT_ROUNDS = 10;
-export const ACCESS_TOKEN_EXPIRES_IN = 1800; // 15 minutes, in seconds
-export const REFRESH_TOKEN_EXPIRES_IN = 2592000; // 30 days, in seconds
+export const ACCESS_TOKEN_EXPIRES_IN = 1800; // 15 minutes, in seconds.
+export const REFRESH_TOKEN_EXPIRES_IN = 2592000; // 30 days, in seconds.
+export const PASSWORD_RESET_TOKEN_EXPIRES_IN = 1800; // 15 minutes, in seconds.
 
 export class UserNotFoundException extends Error {
   constructor() {
@@ -25,9 +26,21 @@ export class InvalidRefreshTokenException extends Error {
   }
 }
 
+export class InvalidPasswordResetTokenException extends Error {
+  constructor() {
+    super("Invalid password reset token");
+  }
+}
+
 export class ExpiredRefreshTokenException extends Error {
   constructor() {
     super("Expired refresh token");
+  }
+}
+
+export class ExpiredPasswordResetTokenException extends Error {
+  constructor() {
+    super("Expired password reset token");
   }
 }
 
@@ -98,4 +111,30 @@ export const getSecret = () => {
     throw new Error("SECRET not set in environment");
   }
   return secret;
+};
+
+export const generatePasswordResetToken = async (user: User) => {
+  const token = await user.createPasswordResetToken();
+  return token;
+};
+
+export const authenticatePasswordResetToken = async (
+  tokenID: string
+): Promise<[PasswordResetToken, User]> => {
+  const token = await PasswordResetToken.findByPk(tokenID);
+  if (token === null) {
+    throw new InvalidPasswordResetTokenException();
+  }
+  const tokenDate = DateTime.fromJSDate(token.createdAt);
+  const tokenAge = Math.abs(tokenDate.diffNow().as("seconds"));
+  if (tokenAge > PASSWORD_RESET_TOKEN_EXPIRES_IN) {
+    await revokePasswordResetToken(token);
+    throw new ExpiredPasswordResetTokenException();
+  }
+  const owner = await token.getUser();
+  return [token, owner];
+};
+
+export const revokePasswordResetToken = async (token: PasswordResetToken) => {
+  await token.destroy();
 };

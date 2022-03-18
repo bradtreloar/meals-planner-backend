@@ -1,5 +1,5 @@
 import { initInMemorySequelize } from "@app/database";
-import { RefreshToken, User } from "@app/models";
+import { PasswordResetToken, RefreshToken, User } from "@app/models";
 import jwt from "jsonwebtoken";
 import { JwtPayload, JsonWebTokenError } from "jsonwebtoken";
 import { faker } from "@faker-js/faker";
@@ -17,10 +17,17 @@ import {
   revokeRefreshToken,
   ExpiredRefreshTokenException,
   REFRESH_TOKEN_EXPIRES_IN,
+  generatePasswordResetToken,
+  authenticatePasswordResetToken,
+  PASSWORD_RESET_TOKEN_EXPIRES_IN,
+  InvalidPasswordResetTokenException,
+  ExpiredPasswordResetTokenException,
+  revokePasswordResetToken,
 } from ".";
 import { UserFactory } from "@app/factories/User";
 import { RefreshTokenFactory } from "@app/factories/RefreshToken";
 import { mockNow } from "@app/setupTestsAfterEnv";
+import { PasswordResetTokenFactory } from "@app/factories/PasswordResetToken";
 
 describe("authenticatePassword", () => {
   beforeEach(async () => {
@@ -207,12 +214,112 @@ describe("revokeRefreshToken", () => {
     const result = await RefreshToken.findAll();
     expect(result).toHaveLength(0);
   });
+});
 
-  it("throws error when refresh token does not exist", async () => {
+describe("generatePasswordResetToken", () => {
+  beforeEach(async () => {
+    await initInMemorySequelize();
+  });
+
+  it("creates password reset token", async () => {
+    const user = await UserFactory.create();
+
+    const returnedToken = await generatePasswordResetToken(user);
+
+    const token = (await PasswordResetToken.findOne()) as PasswordResetToken;
+    expect(returnedToken.toJSON()).toStrictEqual(token.toJSON());
+  });
+});
+
+describe("authenticatePasswordResetToken", () => {
+  beforeEach(async () => {
+    await initInMemorySequelize();
+  });
+
+  it("returns user when password reset token exists", async () => {
+    const user = await UserFactory.create();
+    const token = await user.createPasswordResetToken();
+
+    const [retrievedToken, owner] = await authenticatePasswordResetToken(
+      token.id
+    );
+
+    expect(retrievedToken?.toJSON()).toStrictEqual(token?.toJSON());
+    expect(owner?.toJSON()).toStrictEqual(user?.toJSON());
+  });
+
+  it("throws error when password reset token does not exist", async () => {
     const tokenID = faker.random.alphaNumeric(64);
 
-    await expect(authenticateRefreshToken(tokenID)).rejects.toThrow(
-      InvalidRefreshTokenException
+    await expect(authenticatePasswordResetToken(tokenID)).rejects.toThrow(
+      InvalidPasswordResetTokenException
     );
+  });
+
+  it("returns user when password reset token at maximum age", async () => {
+    const user = await UserFactory.create();
+    const tokenDate = mockNow
+      .minus({ seconds: PASSWORD_RESET_TOKEN_EXPIRES_IN })
+      .toJSDate();
+    const token = await PasswordResetTokenFactory.create(user, {
+      createdAt: tokenDate,
+      updatedAt: tokenDate,
+    });
+
+    const [retrievedToken, owner] = await authenticatePasswordResetToken(
+      token.id
+    );
+
+    expect(retrievedToken?.toJSON()).toStrictEqual(token?.toJSON());
+    expect(owner?.toJSON()).toStrictEqual(user?.toJSON());
+  });
+
+  it("throws error when password reset token has expired", async () => {
+    const user = await UserFactory.create();
+    const tokenDate = mockNow
+      .minus({ seconds: PASSWORD_RESET_TOKEN_EXPIRES_IN + 1 })
+      .toJSDate();
+    const token = await PasswordResetTokenFactory.create(user, {
+      createdAt: tokenDate,
+      updatedAt: tokenDate,
+    });
+
+    await expect(authenticatePasswordResetToken(token.id)).rejects.toThrow(
+      ExpiredPasswordResetTokenException
+    );
+  });
+
+  it("deletes expired token", async () => {
+    const user = await UserFactory.create();
+    const tokenDate = mockNow
+      .minus({ seconds: PASSWORD_RESET_TOKEN_EXPIRES_IN + 1 })
+      .toJSDate();
+    const token = await PasswordResetTokenFactory.create(user, {
+      createdAt: tokenDate,
+      updatedAt: tokenDate,
+    });
+
+    await expect(authenticatePasswordResetToken(token.id)).rejects.toThrow(
+      ExpiredPasswordResetTokenException
+    );
+
+    const tokens = await RefreshToken.findAll();
+    expect(tokens).toHaveLength(0);
+  });
+});
+
+describe("revokePasswordResetToken", () => {
+  beforeEach(async () => {
+    await initInMemorySequelize();
+  });
+
+  it("deletes password reset token", async () => {
+    const user = await UserFactory.create();
+    const token = await user.createRefreshToken();
+
+    revokePasswordResetToken(token);
+
+    const result = await RefreshToken.findAll();
+    expect(result).toHaveLength(0);
   });
 });

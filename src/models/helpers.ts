@@ -17,7 +17,7 @@ export const timestamps = () => ({
   updatedAt: DataTypes.DATE,
 });
 
-export const randomRefreshTokenValue = (length: number) =>
+export const randomTokenValue = (length: number) =>
   Crypto.randomBytes(length).toString("base64").slice(0, length);
 
 /**

@@ -1,16 +1,16 @@
-import { RefreshToken, User } from "@app/models";
+import { PasswordResetToken, User } from "@app/models";
 import { randomTokenValue } from "@app/models/helpers";
 import { defaults } from "lodash";
 import { InferAttributes, InferCreationAttributes } from "sequelize/types";
 
-export class RefreshTokenFactory {
+export class PasswordResetTokenFactory {
   static build(
     user: User,
-    attributes?: Partial<InferAttributes<RefreshToken>>
+    attributes?: Partial<InferAttributes<PasswordResetToken>>
   ) {
     const idLength = 64;
 
-    return RefreshToken.build(
+    return PasswordResetToken.build(
       defaults(attributes, {
         id: randomTokenValue(idLength),
         userID: user.id,
@@ -20,13 +20,13 @@ export class RefreshTokenFactory {
 
   static async create(
     user: User,
-    attributes?: Partial<InferCreationAttributes<RefreshToken>>
+    attributes?: Partial<InferCreationAttributes<PasswordResetToken>>
   ) {
-    const { id } = await RefreshToken.create(
+    const { id } = await PasswordResetToken.create(
       defaults(attributes, {
         userID: user.id,
       })
     );
-    return (await RefreshToken.findByPk(id)) as RefreshToken;
+    return (await PasswordResetToken.findByPk(id)) as PasswordResetToken;
   }
 }

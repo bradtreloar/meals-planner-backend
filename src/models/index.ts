@@ -10,7 +10,7 @@ import {
 } from "sequelize";
 import {
   primaryKey,
-  randomRefreshTokenValue,
+  randomTokenValue,
   requiredForeignKey,
   timestamps,
 } from "./helpers";
@@ -53,6 +53,7 @@ export class User extends Model<
   declare updatedAt: CreationOptional<Date>;
 
   declare createRefreshToken: HasManyCreateAssociationMixin<RefreshToken>;
+  declare createPasswordResetToken: HasManyCreateAssociationMixin<PasswordResetToken>;
 }
 
 addModel(
@@ -86,6 +87,9 @@ addModel(
     User.hasMany(RefreshToken, {
       foreignKey: "userID",
     });
+    User.hasMany(PasswordResetToken, {
+      foreignKey: "userID",
+    });
   }
 );
 
@@ -110,7 +114,7 @@ addModel(
       {
         id: {
           type: DataTypes.STRING(idLength),
-          defaultValue: () => randomRefreshTokenValue(idLength),
+          defaultValue: () => randomTokenValue(idLength),
           primaryKey: true,
         },
         userID: requiredForeignKey(),
@@ -123,6 +127,48 @@ addModel(
   },
   () => {
     RefreshToken.belongsTo(User, {
+      foreignKey: {
+        name: "userID",
+        allowNull: false,
+      },
+    });
+  }
+);
+
+export class PasswordResetToken extends Model<
+  InferAttributes<PasswordResetToken>,
+  InferCreationAttributes<PasswordResetToken>
+> {
+  declare id: CreationOptional<string>;
+  declare userID: number;
+
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
+
+  declare getUser: BelongsToGetAssociationMixin<User>;
+}
+
+addModel(
+  (sequelize: Sequelize) => {
+    const idLength = 64;
+
+    PasswordResetToken.init(
+      {
+        id: {
+          type: DataTypes.STRING(idLength),
+          defaultValue: () => randomTokenValue(idLength),
+          primaryKey: true,
+        },
+        userID: requiredForeignKey(),
+        ...timestamps(),
+      },
+      {
+        sequelize,
+      }
+    );
+  },
+  () => {
+    PasswordResetToken.belongsTo(User, {
       foreignKey: {
         name: "userID",
         allowNull: false,
