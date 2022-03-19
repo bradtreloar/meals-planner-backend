@@ -34,7 +34,7 @@ describe("login controller", () => {
       status: mockResponseStatus,
     } as unknown as Response;
     const accessToken = faker.random.alphaNumeric(20);
-    // @ts-expect-error
+    // @ts-expect-error Mock has incorrect type.
     auth.generateAccessToken = jest.fn().mockReturnValue(accessToken);
 
     await login(req, res);
@@ -125,7 +125,7 @@ describe("refresh controller", () => {
       status: mockResponseStatus,
     } as unknown as Response;
     const accessToken = faker.random.alphaNumeric(20);
-    // @ts-expect-error
+    // @ts-expect-error Mock has incorrect type.
     auth.generateAccessToken = jest.fn().mockReturnValue(accessToken);
 
     await refresh(req, res);
