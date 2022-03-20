@@ -7,8 +7,8 @@ const DIST_DIR = "./dist";
 const IGNORED_FILES = [
   "./src/setupTests.ts",
   "./src/setupTestsAfterEnv.ts",
-  /\/types\.d\.ts$/,
-  /\/types\.ts$/,
+  "types.d.ts",
+  "types.ts",
 ];
 
 const listSourceFiles = (dir) => {
