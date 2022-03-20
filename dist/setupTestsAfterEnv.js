@@ -22,7 +22,13 @@ beforeEach(function () {
   jest.resetModules();
 
   process.env = _objectSpread({
-    SECRET: _faker["default"].random.alphaNumeric(20) },
+    SECRET: _faker["default"].random.alphaNumeric(20),
+    SMTP_HOST: _faker["default"].internet.url(),
+    SMTP_PORT: _faker["default"].internet.port().toString(),
+    SMTP_USERNAME: _faker["default"].random.alphaNumeric(12),
+    SMTP_PASSWORD: _faker["default"].random.alphaNumeric(12),
+    SMTP_FROM_ADDRESS: _faker["default"].internet.email(),
+    SMTP_FROM_NAME: _faker["default"].random.words(2) },
   ENV);
 
 });

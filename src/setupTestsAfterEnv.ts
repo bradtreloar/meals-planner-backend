@@ -23,6 +23,12 @@ beforeEach(() => {
 
   process.env = {
     SECRET: faker.random.alphaNumeric(20),
+    SMTP_HOST: faker.internet.url(),
+    SMTP_PORT: faker.internet.port().toString(),
+    SMTP_USERNAME: faker.random.alphaNumeric(12),
+    SMTP_PASSWORD: faker.random.alphaNumeric(12),
+    SMTP_FROM_ADDRESS: faker.internet.email(),
+    SMTP_FROM_NAME: faker.random.words(2),
     ...ENV,
   };
 });
