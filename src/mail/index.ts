@@ -1,5 +1,7 @@
+import nodemailer from "nodemailer";
 import { values } from "lodash";
 import { compileFile } from "pug";
+import { User } from "@app/models";
 
 export class EnvironmentVariableNotSetException extends Error {
   constructor(variableName: string) {
@@ -32,10 +34,36 @@ export const getSMTPSettings = () => {
     fromAddress: process.env[variableMappings.fromAddress] as string,
     fromName: process.env[variableMappings.fromName] as string,
     host: process.env[variableMappings.host] as string,
-    port: process.env[variableMappings.port] as string,
+    port: parseInt(process.env[variableMappings.port] as string),
     username: process.env[variableMappings.username] as string,
     password: process.env[variableMappings.password] as string,
   };
 
   return settings;
+};
+
+export const sendMail = async (
+  user: User,
+  subject: string,
+  message: string
+) => {
+  const { fromAddress, fromName, host, password, port, username } =
+    getSMTPSettings();
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: true,
+    auth: {
+      user: username,
+      pass: password,
+    },
+  });
+
+  return await transporter.sendMail({
+    from: `"${fromName}" <${fromAddress}>`, // sender address
+    to: user.email,
+    subject,
+    html: message,
+  });
 };
