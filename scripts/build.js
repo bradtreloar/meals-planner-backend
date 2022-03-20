@@ -4,6 +4,12 @@ const path = require("path");
 
 const SRC_DIR = "./src";
 const DIST_DIR = "./dist";
+const IGNORED_FILES = [
+  "./src/setupTests.ts",
+  "./src/setupTestsAfterEnv.ts",
+  /\/types\.d\.ts$/,
+  /\/types\.ts$/,
+];
 
 const listSourceFiles = (dir) => {
   const paths = fs.readdirSync(dir).map((basename) => `${dir}/${basename}`);
@@ -19,7 +25,17 @@ const listSourceFiles = (dir) => {
 };
 
 const listTypeScriptFiles = (dir) => {
-  return listSourceFiles(dir).filter((path) => path.match(/^(.+)\.ts$/));
+  const tsFiles = listSourceFiles(dir).filter((filepath) =>
+    filepath.match(/^(.+)\.ts$/)
+  );
+  return tsFiles.filter((filepath) => {
+    for (let pattern of IGNORED_FILES) {
+      if (filepath.match(pattern)) {
+        return false;
+      }
+    }
+    return true;
+  });
 };
 
 const listPugFiles = (dir) => {
