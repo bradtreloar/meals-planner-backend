@@ -9,6 +9,7 @@ const IGNORED_FILES = [
   "./src/setupTestsAfterEnv.ts",
   "types.d.ts",
   "types.ts",
+  /\.test\.ts$/,
 ];
 
 const listSourceFiles = (dir) => {
