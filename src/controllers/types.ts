@@ -14,3 +14,9 @@ export interface RefreshRequest extends Request {
     refreshToken: string;
   };
 }
+
+export interface ResetPasswordRequest extends Request {
+  body: {
+    email: string;
+  };
+}

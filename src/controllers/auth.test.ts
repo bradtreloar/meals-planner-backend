@@ -5,14 +5,20 @@ import { Token, User } from "@app/models";
 import faker from "@faker-js/faker";
 import assert from "assert";
 import { Response } from "express";
-import { login, refresh } from "./auth";
+import { login, refresh, resetPassword } from "./auth";
 import * as auth from "@app/auth";
-import { LoginRequest, RefreshRequest } from "./types";
+import { LoginRequest, RefreshRequest, ResetPasswordRequest } from "./types";
 import { TokenFactory } from "@app/factories/Token";
+import * as mail from "@app/mail";
+
+jest.mock("@app/mail");
+
+beforeEach(async () => {
+  await initInMemorySequelize();
+});
 
 describe("login controller", () => {
   it("responds to valid request with user and access/refresh tokens", async () => {
-    await initInMemorySequelize();
     const plainPassword = faker.random.alphaNumeric(20);
     const hashedPassword = await hashPassword(plainPassword);
     await UserFactory.create({
@@ -49,7 +55,6 @@ describe("login controller", () => {
   });
 
   it("responds to invalid email with an error", async () => {
-    await initInMemorySequelize();
     const email = faker.internet.email();
     const password = faker.random.alphaNumeric(20);
     const req = {
@@ -75,7 +80,6 @@ describe("login controller", () => {
   });
 
   it("responds to invalid password with an error", async () => {
-    await initInMemorySequelize();
     const plainPassword = faker.random.alphaNumeric(20);
     const incorreCtPassword = faker.random.alphaNumeric(20);
     const hashedPassword = await hashPassword(plainPassword);
@@ -109,7 +113,6 @@ describe("login controller", () => {
 
 describe("refresh controller", () => {
   it("responds to valid request with new access/refresh tokens", async () => {
-    await initInMemorySequelize();
     const user = await UserFactory.create();
     const refreshToken = await TokenFactory.create(user);
     const req = {
@@ -141,7 +144,6 @@ describe("refresh controller", () => {
   });
 
   it("responds to invalid token with an error", async () => {
-    await initInMemorySequelize();
     const req = {
       body: {
         refreshToken: faker.random.alphaNumeric(64),
@@ -160,6 +162,71 @@ describe("refresh controller", () => {
     expect(mockResponseStatus).toHaveBeenCalledWith(401);
     expect(mockResponseJson).toHaveBeenCalledWith({
       error: "Invalid token",
+    });
+  });
+});
+
+describe("resetPassword controller", () => {
+  it("responds to a valid request with no content", async () => {
+    const user = await UserFactory.create();
+    const req = {
+      body: {
+        email: user.email,
+      },
+    } as ResetPasswordRequest;
+    const mockResponseStatus = jest.fn();
+    const res = {
+      status: mockResponseStatus,
+    } as unknown as Response;
+
+    await resetPassword(req, res);
+
+    expect(mockResponseStatus).toHaveBeenCalledWith(204);
+  });
+
+  it("sends password reset email to user", async () => {
+    const user = await UserFactory.create();
+    const req = {
+      body: {
+        email: user.email,
+      },
+    } as ResetPasswordRequest;
+    const mockResponseStatus = jest.fn();
+    const res = {
+      status: mockResponseStatus,
+    } as unknown as Response;
+    jest.spyOn(mail, "sendMail");
+    const message = faker.random.words(5);
+    jest.spyOn(mail, "renderPasswordResetMessage").mockReturnValue(message);
+
+    await resetPassword(req, res);
+
+    expect(mail.sendMail).toHaveBeenCalledWith(
+      user,
+      "Reset your password",
+      message
+    );
+  });
+
+  it("rejects a request with an invalid email address", async () => {
+    const req = {
+      body: {
+        email: faker.internet.email(),
+      },
+    } as ResetPasswordRequest;
+    const mockResponseJson = jest.fn();
+    const mockResponseStatus = jest.fn().mockReturnValue({
+      json: mockResponseJson,
+    });
+    const res = {
+      status: mockResponseStatus,
+    } as unknown as Response;
+
+    await resetPassword(req, res);
+
+    expect(mockResponseStatus).toHaveBeenCalledWith(422);
+    expect(mockResponseJson).toHaveBeenCalledWith({
+      error: "No user with this email address",
     });
   });
 });
