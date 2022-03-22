@@ -24,41 +24,47 @@ describe("example endpoint", () => {
 });
 
 describe("/auth endpoints", () => {
-  it("/login responds with user, access token and refresh token", async () => {
-    const plainPassword = faker.random.alphaNumeric(20);
-    const { id } = await UserFactory.create({
-      password: await hashPassword(plainPassword),
+  describe("/auth/login", () => {
+    it("responds with user, access token and refresh token", async () => {
+      const plainPassword = faker.random.alphaNumeric(20);
+      const { id } = await UserFactory.create({
+        password: await hashPassword(plainPassword),
+      });
+      const user = (await User.scope("public").findByPk(id)) as User;
+      const app = createApp();
+      const res = await supertest(app).post("/auth/login").send({
+        email: user.email,
+        password: plainPassword,
+      });
+      expect(res.status).toBe(200);
+      expect(res.body.user).toStrictEqual(modelToJSON(user));
+      expect(res.body.accessToken).not.toBeUndefined();
+      expect(res.body.refreshToken).not.toBeUndefined();
     });
-    const user = (await User.scope("public").findByPk(id)) as User;
-    const app = createApp();
-    const res = await supertest(app).post("/auth/login").send({
-      email: user.email,
-      password: plainPassword,
-    });
-    expect(res.status).toBe(200);
-    expect(res.body.user).toStrictEqual(modelToJSON(user));
-    expect(res.body.accessToken).not.toBeUndefined();
-    expect(res.body.refreshToken).not.toBeUndefined();
   });
 
-  it("/refresh responds with access token and refresh token", async () => {
-    const user = await UserFactory.create();
-    const token = await TokenFactory.create(user);
-    const app = createApp();
-    const res = await supertest(app).post("/auth/refresh").send({
-      refreshToken: token.id,
+  describe("/auth/refresh", () => {
+    it("responds with access token and refresh token", async () => {
+      const user = await UserFactory.create();
+      const token = await TokenFactory.create(user);
+      const app = createApp();
+      const res = await supertest(app).post("/auth/refresh").send({
+        refreshToken: token.id,
+      });
+      expect(res.status).toBe(200);
+      expect(res.body.accessToken).not.toBeUndefined();
+      expect(res.body.refreshToken).not.toBeUndefined();
     });
-    expect(res.status).toBe(200);
-    expect(res.body.accessToken).not.toBeUndefined();
-    expect(res.body.refreshToken).not.toBeUndefined();
   });
 
-  it("/reset-password responds with no content", async () => {
-    const user = await UserFactory.create();
-    const app = createApp();
-    const res = await supertest(app).post("/auth/reset-password").send({
-      email: user.email,
+  describe("/auth/reset-password", () => {
+    it("responds with no content", async () => {
+      const user = await UserFactory.create();
+      const app = createApp();
+      const res = await supertest(app).post("/auth/reset-password").send({
+        email: user.email,
+      });
+      expect(res.status).toBe(204);
     });
-    expect(res.status).toBe(204);
   });
 });
