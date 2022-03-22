@@ -13,6 +13,24 @@ import * as mail from "@app/mail";
 
 jest.mock("@app/mail");
 
+const mockResponse = () => {
+  const json = jest.fn();
+  const send = jest.fn();
+  const status = jest.fn();
+
+  const res = {
+    status,
+    json,
+    send,
+  };
+
+  json.mockReturnValue(res);
+  send.mockReturnValue(res);
+  status.mockReturnValue(res);
+
+  return res as unknown as Response;
+};
+
 beforeEach(async () => {
   await initInMemorySequelize();
 });
@@ -32,13 +50,7 @@ describe("login controller", () => {
         password: plainPassword,
       },
     } as LoginRequest;
-    const mockResponseJson = jest.fn();
-    const mockResponseStatus = jest.fn().mockReturnValue({
-      json: mockResponseJson,
-    });
-    const res = {
-      status: mockResponseStatus,
-    } as unknown as Response;
+    const res = mockResponse();
     const accessToken = faker.random.alphaNumeric(20);
     // @ts-expect-error Mock has incorrect type.
     auth.generateAccessToken = jest.fn().mockReturnValue(accessToken);
@@ -46,8 +58,8 @@ describe("login controller", () => {
     await login(req, res);
 
     const refreshToken = (await Token.findOne()) as Token;
-    expect(mockResponseStatus).toHaveBeenCalledWith(200);
-    expect(mockResponseJson).toHaveBeenCalledWith({
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
       user: user.toJSON(),
       accessToken,
       refreshToken: refreshToken.id,
@@ -63,18 +75,12 @@ describe("login controller", () => {
         password,
       },
     } as LoginRequest;
-    const mockResponseJson = jest.fn();
-    const mockResponseStatus = jest.fn().mockReturnValue({
-      json: mockResponseJson,
-    });
-    const res = {
-      status: mockResponseStatus,
-    } as unknown as Response;
+    const res = mockResponse();
 
     await login(req, res);
 
-    expect(mockResponseStatus).toHaveBeenCalledWith(401);
-    expect(mockResponseJson).toHaveBeenCalledWith({
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({
       error: "Invalid email or password",
     });
   });
@@ -94,18 +100,12 @@ describe("login controller", () => {
         password: incorreCtPassword,
       },
     } as LoginRequest;
-    const mockResponseJson = jest.fn();
-    const mockResponseStatus = jest.fn().mockReturnValue({
-      json: mockResponseJson,
-    });
-    const res = {
-      status: mockResponseStatus,
-    } as unknown as Response;
+    const res = mockResponse();
 
     await login(req, res);
 
-    expect(mockResponseStatus).toHaveBeenCalledWith(401);
-    expect(mockResponseJson).toHaveBeenCalledWith({
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({
       error: "Invalid email or password",
     });
   });
@@ -120,13 +120,7 @@ describe("refresh controller", () => {
         refreshToken: refreshToken.id,
       },
     } as RefreshRequest;
-    const mockResponseJson = jest.fn();
-    const mockResponseStatus = jest.fn().mockReturnValue({
-      json: mockResponseJson,
-    });
-    const res = {
-      status: mockResponseStatus,
-    } as unknown as Response;
+    const res = mockResponse();
     const accessToken = faker.random.alphaNumeric(20);
     // @ts-expect-error Mock has incorrect type.
     auth.generateAccessToken = jest.fn().mockReturnValue(accessToken);
@@ -136,8 +130,8 @@ describe("refresh controller", () => {
     expect(await Token.findAll()).toHaveLength(1);
     const newRefreshToken = (await Token.findOne()) as Token;
     expect(newRefreshToken.id).not.toBe(refreshToken.id);
-    expect(mockResponseStatus).toHaveBeenCalledWith(200);
-    expect(mockResponseJson).toHaveBeenCalledWith({
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
       accessToken,
       refreshToken: newRefreshToken.id,
     });
@@ -149,18 +143,12 @@ describe("refresh controller", () => {
         refreshToken: faker.random.alphaNumeric(64),
       },
     } as RefreshRequest;
-    const mockResponseJson = jest.fn();
-    const mockResponseStatus = jest.fn().mockReturnValue({
-      json: mockResponseJson,
-    });
-    const res = {
-      status: mockResponseStatus,
-    } as unknown as Response;
+    const res = mockResponse();
 
     await refresh(req, res);
 
-    expect(mockResponseStatus).toHaveBeenCalledWith(401);
-    expect(mockResponseJson).toHaveBeenCalledWith({
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({
       error: "Invalid token",
     });
   });
@@ -174,16 +162,12 @@ describe("resetPassword controller", () => {
         email: user.email,
       },
     } as ResetPasswordRequest;
-    const mockResponseStatus = jest.fn().mockReturnValue({
-      send: jest.fn(),
-    });
-    const res = {
-      status: mockResponseStatus,
-    } as unknown as Response;
+    const res = mockResponse();
 
     await resetPassword(req, res);
 
-    expect(mockResponseStatus).toHaveBeenCalledWith(204);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.send).toHaveBeenCalled();
   });
 
   it("sends password reset email to user", async () => {
@@ -193,12 +177,7 @@ describe("resetPassword controller", () => {
         email: user.email,
       },
     } as ResetPasswordRequest;
-    const mockResponseStatus = jest.fn().mockReturnValue({
-      send: jest.fn(),
-    });
-    const res = {
-      status: mockResponseStatus,
-    } as unknown as Response;
+    const res = mockResponse();
     jest.spyOn(mail, "sendMail");
     const message = faker.random.words(5);
     jest.spyOn(mail, "renderPasswordResetMessage").mockReturnValue(message);
@@ -218,18 +197,12 @@ describe("resetPassword controller", () => {
         email: faker.internet.email(),
       },
     } as ResetPasswordRequest;
-    const mockResponseJson = jest.fn();
-    const mockResponseStatus = jest.fn().mockReturnValue({
-      json: mockResponseJson,
-    });
-    const res = {
-      status: mockResponseStatus,
-    } as unknown as Response;
+    const res = mockResponse();
 
     await resetPassword(req, res);
 
-    expect(mockResponseStatus).toHaveBeenCalledWith(422);
-    expect(mockResponseJson).toHaveBeenCalledWith({
+    expect(res.status).toHaveBeenCalledWith(422);
+    expect(res.json).toHaveBeenCalledWith({
       error: "No user with this email address",
     });
   });
