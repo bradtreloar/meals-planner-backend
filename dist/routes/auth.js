@@ -4,6 +4,7 @@ var _express = require("express");
 var authRouter = (0, _express.Router)();
 
 authRouter.post("/login", _auth.login);
-authRouter.post("/refresh", _auth.refresh);var _default =
+authRouter.post("/refresh", _auth.refresh);
+authRouter.post("/reset-password", _auth.resetPassword);var _default =
 
 authRouter;exports["default"] = _default;

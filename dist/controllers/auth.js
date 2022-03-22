@@ -75,7 +75,7 @@ var resetPassword = /*#__PURE__*/function () {var _ref3 = _asyncToGenerator( /*#
 
             user !== null)) {_context3.next = 14;break;}_context3.next = 7;return (
               (0, _auth.generatePasswordResetToken)(user));case 7:token = _context3.sent;
-            url = "mealsplanner://reset-password/".concat(token);_context3.next = 11;return (
+            url = "mealsplanner://reset-password/".concat(token.id);_context3.next = 11;return (
               (0, _mail.sendMail)(
               user,
               "Reset your password",
@@ -83,7 +83,7 @@ var resetPassword = /*#__PURE__*/function () {var _ref3 = _asyncToGenerator( /*#
                 url: url })));case 11:
 
 
-            res.status(204);_context3.next = 15;break;case 14:
+            res.status(204).send();_context3.next = 15;break;case 14:
 
             res.status(422).json({
               error: "No user with this email address" });case 15:case "end":return _context3.stop();}}}, _callee3);}));return function resetPassword(_x5, _x6) {return _ref3.apply(this, arguments);};}();exports.resetPassword = resetPassword;

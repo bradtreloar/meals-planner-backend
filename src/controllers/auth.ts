@@ -75,7 +75,7 @@ export const resetPassword: AsyncController = async (
   });
   if (user !== null) {
     const token = await generatePasswordResetToken(user);
-    const url = `mealsplanner://reset-password/${token}`;
+    const url = `mealsplanner://reset-password/${token.id}`;
     await sendMail(
       user,
       "Reset your password",
@@ -83,7 +83,7 @@ export const resetPassword: AsyncController = async (
         url,
       })
     );
-    res.status(204);
+    res.status(204).send();
   } else {
     res.status(422).json({
       error: "No user with this email address",
