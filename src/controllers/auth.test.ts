@@ -174,7 +174,9 @@ describe("resetPassword controller", () => {
         email: user.email,
       },
     } as ResetPasswordRequest;
-    const mockResponseStatus = jest.fn();
+    const mockResponseStatus = jest.fn().mockReturnValue({
+      send: jest.fn(),
+    });
     const res = {
       status: mockResponseStatus,
     } as unknown as Response;
@@ -191,7 +193,9 @@ describe("resetPassword controller", () => {
         email: user.email,
       },
     } as ResetPasswordRequest;
-    const mockResponseStatus = jest.fn();
+    const mockResponseStatus = jest.fn().mockReturnValue({
+      send: jest.fn(),
+    });
     const res = {
       status: mockResponseStatus,
     } as unknown as Response;
